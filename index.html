@@ -3789,6 +3789,57 @@
       display:none;
     }
 
+    .initial-loading-screen{
+      position:fixed;
+      inset:0;
+      z-index:510;
+      display:none;
+      place-items:center;
+      padding:22px;
+      background:
+        radial-gradient(circle at 82% 14%,rgba(0,147,171,.13),transparent 28%),
+        linear-gradient(145deg,#eef4f1,#e4ece8);
+    }
+
+    body.boot-restoring{
+      overflow:hidden;
+    }
+
+    body.boot-restoring .initial-loading-screen{
+      display:grid;
+    }
+
+    body.boot-restoring .login-screen{
+      display:none;
+    }
+
+    .initial-loading-content{
+      display:grid;
+      justify-items:center;
+      gap:14px;
+      color:var(--green);
+      text-align:center;
+    }
+
+    .initial-loading-spinner{
+      width:42px;
+      height:42px;
+      border:4px solid rgba(0,97,73,.16);
+      border-top-color:var(--cyan);
+      border-radius:50%;
+      animation:loginLoadingSpin .78s linear infinite;
+    }
+
+    .initial-loading-content strong{
+      font-size:16px;
+      font-weight:700;
+    }
+
+    .initial-loading-content span{
+      color:var(--muted);
+      font-size:13px;
+    }
+
     .login-card{
       width:min(430px,100%);
       overflow:hidden;
@@ -3909,6 +3960,33 @@
       margin-top:1px;
       font-size:13px;
       font-weight:400;
+    }
+
+    .login-submit.is-loading{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:9px;
+      cursor:wait;
+    }
+
+    .login-submit.is-loading::before{
+      content:"";
+      width:16px;
+      height:16px;
+      flex:0 0 16px;
+      border:2px solid rgba(255,255,255,.42);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation:loginLoadingSpin .72s linear infinite;
+    }
+
+    @keyframes loginLoadingSpin{
+      to{transform:rotate(360deg);}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .login-submit.is-loading::before{animation-duration:1.4s;}
     }
 
     .login-demo-note{
@@ -9601,10 +9679,70 @@
       width:min(280px,100%);
     }
   }
-  .entrada-evolucion-content{display:grid;gap:18px}
+
+  /* Entrada > Evolución: mantém o estado vazio centralizado e com a mesma
+     geometria visual das demais telas, sem deixar as ações soltas no topo. */
+  #view-entrada-evolucion .embarques2-empty-state{
+    display:none;
+    width:100%;
+    min-height:360px;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:40px 24px;
+    text-align:center;
+  }
+
+  #view-entrada-evolucion.is-empty .page-head{
+    display:none !important;
+  }
+
+  #view-entrada-evolucion.is-empty .embarques2-empty-state{
+    display:flex;
+  }
+
+  #view-entrada-evolucion .embarques2-empty-state h2{
+    margin:0;
+    color:var(--ink);
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:-.02em;
+  }
+
+  #view-entrada-evolucion .embarques2-empty-state p{
+    margin:0 0 14px;
+    color:var(--muted);
+    font-size:13px;
+    font-weight:400;
+  }
+
+  #view-entrada-evolucion .embarques2-empty-import-btn{
+    width:240px;
+    height:54px;
+    min-height:54px;
+    border-radius:14px;
+    font-size:14px;
+    font-weight:600;
+  }
+
+  #view-entrada-evolucion .embarques2-empty-import-btn svg{
+    width:19px;
+    height:19px;
+  }
+
+  @media(max-width:900px){
+    #view-entrada-evolucion .embarques2-empty-import-btn{
+      width:min(280px,100%);
+    }
+  }
+
+  .entrada-evolucion-content{
+    display:grid;gap:18px;width:90%;margin-left:auto;margin-right:auto
+  }
   .entrada-evolucion-content[hidden]{display:none}
   .entrada-evolucion-toolbar{
-    display:grid;grid-template-columns:minmax(520px,1fr) minmax(570px,1fr);align-items:stretch;gap:18px;
+    display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);align-items:stretch;gap:18px;
     padding:16px 18px;background:#fff;border:1px solid #dce8eb;border-radius:14px
   }
   .entrada-evolucion-filters{
@@ -9628,66 +9766,54 @@
     font-weight:700;
     line-height:1.2;
   }
-  #view-entrada-evolucion .embarques2-date-range-control{
-    height:38px;
-    display:flex;
-    align-items:stretch;
-    gap:8px;
+  .entrada-evolucion-period-slider{display:grid;gap:7px;min-width:0}
+  .entrada-evolucion-period-values{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#314b52;font-size:12px;font-weight:600}
+  .entrada-evolucion-period-track{
+    position:relative;height:32px;margin:-6px 0;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none
   }
-  #view-entrada-evolucion .embarques2-date-range-field{
-    flex:1 1 0;
-    min-width:0;
-    height:38px;
-    display:flex;
-    flex-direction:row;
-    align-items:center;
-    gap:8px;
-    padding:0 10px 0 12px;
-    border:1px solid var(--line);
-    border-radius:13px;
-    background:#fff;
-    cursor:pointer;
-    transition:background .16s ease,border-color .16s ease;
+  .entrada-evolucion-period-track.is-dragging{cursor:grabbing}
+  .entrada-evolucion-period-track::before,
+  .entrada-evolucion-period-selection{content:"";position:absolute;top:14px;left:0;right:0;height:4px;border-radius:99px;background:#dce8eb}
+  .entrada-evolucion-period-selection{right:auto;background:#0093ab;pointer-events:none}
+  .entrada-evolucion-period-track input[type="range"]{
+    position:absolute;inset:0;width:100%;height:32px;margin:0;background:transparent;appearance:none;-webkit-appearance:none;pointer-events:none
   }
-  #view-entrada-evolucion .embarques2-date-range-field:hover{
-    background:var(--soft);
-    border-color:#b8dfe5;
+  .entrada-evolucion-period-track input[type="range"]::-webkit-slider-thumb{
+    width:18px;height:18px;border:3px solid #0093ab;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(16,54,62,.18);
+    appearance:none;-webkit-appearance:none;pointer-events:auto;cursor:grab
   }
-  #view-entrada-evolucion .embarques2-date-range-label,
-  #view-entrada-evolucion .embarques2-date-range-field input{
-    font-size:13px;
-    font-weight:400;
-  }
-  #view-entrada-evolucion .embarques2-date-range-label{
-    color:var(--muted);
-    white-space:nowrap;
-  }
-  #view-entrada-evolucion .embarques2-date-range-field input{
-    width:100%;
-    height:22px;
-    padding:0;
-    border:0;
-    outline:0;
-    background:transparent;
-    color:var(--ink);
-    cursor:text;
-  }
-  #view-entrada-evolucion .embarques2-date-range-field input[type="date"]::-webkit-calendar-picker-indicator{
-    display:none!important;
-    opacity:0!important;
-    width:0!important;
-    height:0!important;
-    margin:0!important;
-    padding:0!important;
-    pointer-events:none!important;
+  .entrada-evolucion-period-track input[type="range"]::-moz-range-thumb{
+    width:13px;height:13px;border:3px solid #0093ab;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(16,54,62,.18);
+    pointer-events:auto;cursor:grab
   }
   .entrada-evolucion-project-filter{display:grid;gap:7px;min-width:0;width:100%;font-size:13px;color:#14262b}
   .entrada-evolucion-project-filter>strong{font-weight:700}
   .entrada-evolucion-project-filter select{
-    width:100%;height:38px;min-width:0;padding:0 38px 0 12px;border:1px solid #ccdadd;border-radius:13px;
-    background:#fff;color:#111;font-family:inherit;font-size:13px;font-weight:400;outline:none
+    width:100%;height:38px;min-width:0;padding:0 46px 0 12px;border:1px solid #ccdadd;border-radius:13px;
+    background-color:#fff;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%2314262b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 20px center;background-size:12px 8px;
+    color:#111;font-family:inherit;font-size:13px;font-weight:400;outline:none;
+    appearance:none;-webkit-appearance:none;-moz-appearance:none
   }
   .entrada-evolucion-project-filter select:focus{border-color:#0093ab;box-shadow:0 0 0 3px rgba(0,147,171,.12)}
+  /* Evolución — tipografía uniforme de 12 px en filtros y resumen */
+  #view-entrada-evolucion .entrada-evolucion-toolbar,
+  #view-entrada-evolucion .entrada-evolucion-project-filter,
+  #view-entrada-evolucion .entrada-evolucion-project-filter>strong,
+  #view-entrada-evolucion .entrada-evolucion-project-filter select,
+  #view-entrada-evolucion .entrada-silo-filter>strong,
+  #view-entrada-evolucion .entrada-silo-toggle,
+  #view-entrada-evolucion .entrada-silo-search,
+  #view-entrada-evolucion .entrada-silo-panel-action,
+  #view-entrada-evolucion .entrada-silo-option,
+  #view-entrada-evolucion .entrada-silo-empty,
+  #view-entrada-evolucion .entrada-evolucion-period-title,
+  #view-entrada-evolucion .entrada-evolucion-period-values,
+  #view-entrada-evolucion .entrada-evolucion-summary>div>span,
+  #view-entrada-evolucion .entrada-evolucion-summary strong{
+    font-size:12px;
+  }
   .entrada-evolucion-summary{
     display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
     width:100%;max-width:none
@@ -9704,39 +9830,101 @@
     display:grid;align-content:center;flex:1;gap:7px;
     font-size:13px;font-weight:700;color:#0e2b32
   }
+  .entrada-evolucion-mode-row{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    min-height:40px;flex:0 0 auto;margin:0 0 12px
+  }
+  .entrada-evolucion-mode-toggle{
+    display:inline-flex;align-items:center;height:40px;box-sizing:border-box;padding:3px;border:1px solid #ccdadd;border-radius:12px;
+    background:#f4f8f9;box-shadow:none
+  }
+  .entrada-evolucion-mode-button{
+    min-width:112px;height:32px;padding:0 18px;border:0;border-radius:9px;background:transparent;
+    color:#5c7075;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .16s ease,color .16s ease,box-shadow .16s ease
+  }
+  .entrada-evolucion-mode-button:hover{color:#12343c}
+  .entrada-evolucion-mode-button.is-active{
+    background:#fff;color:#007f93;box-shadow:none
+  }
+  .entrada-evolucion-mode-button:focus-visible{outline:2px solid rgba(0,147,171,.28);outline-offset:1px}
   .entrada-summary-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;min-height:22px}
   .entrada-summary-project{display:flex;align-items:center;min-width:0;gap:7px;color:#536b71}
   .entrada-summary-project i{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#0093ab}
   .entrada-summary-row.compare .entrada-summary-project i{background:#f59e0b}
   .entrada-summary-project span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:400}
   .entrada-summary-value{white-space:nowrap;font-size:13px;font-weight:800;color:#102b32}
+  .entrada-summary-difference{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px;padding-top:7px;
+    border-top:1px solid #e5eef0;color:#61767b;font-size:11px;font-weight:600
+  }
+  .entrada-summary-difference b{
+    display:inline-flex;align-items:center;justify-content:center;min-width:62px;padding:3px 7px;border-radius:999px;
+    background:#eef3f4;color:#52666b;font-size:11px;font-weight:800
+  }
+  .entrada-summary-difference.is-positive b{background:#e9f7ef;color:#17834b}
+  .entrada-summary-difference.is-negative b{background:#fff0f0;color:#c53b3b}
   .entrada-evolucion-chart-card{
-    min-height:590px;padding:18px 10px 20px;background:#fff;border:1px solid #dce8eb;border-radius:14px;
-    box-shadow:0 8px 24px rgba(16,54,62,.06);display:flex;flex-direction:column
+    height:var(--entrada-evolucion-chart-height,520px);min-height:0;padding:16px 10px 12px;background:#fff;border:1px solid #dce8eb;border-radius:14px;
+    box-shadow:0 8px 24px rgba(16,54,62,.06);display:flex;flex-direction:column;width:100%;box-sizing:border-box
   }
   .entrada-evolucion-chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:0 8px 10px}
-  .entrada-evolucion-chart-head h2{margin:0 0 4px;font-size:17px;color:#102b32}
-  .entrada-evolucion-chart-head p{margin:0;font-size:12px;color:#6b7d82}
-  .entrada-evolucion-legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12px;color:#4c6268}
-  .entrada-evolucion-legend span{display:inline-flex;align-items:center;gap:7px}
-  .entrada-evolucion-legend i{width:20px;height:3px;border-radius:99px;background:#0093ab}
-  .entrada-evolucion-legend .compare-dot{background:#f59e0b}
-  .entrada-evolucion-chart-wrap{position:relative;min-height:500px;flex:1;overflow:hidden}
-  #entradaEvolucionChart{display:block;width:100%;height:100%;min-height:500px;overflow:visible}
+  .entrada-evolucion-chart-head>div:first-child{min-width:0;flex:1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px}
+  .entrada-evolucion-chart-head h2{margin:0;font-size:17px;color:#102b32}
+  .entrada-evolucion-chart-head p{display:none}
+  .entrada-evolucion-chart-legend{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px 18px;margin:0}
+  .entrada-evolucion-chart-legend[hidden]{display:none}
+  .entrada-evolucion-chart-legend-item{display:inline-flex;align-items:center;gap:7px;color:#53686d;font-size:12px;font-weight:700}
+  .entrada-evolucion-chart-legend-line{width:28px;height:0;border-top:3px solid #0093ab;border-radius:999px}
+  .entrada-evolucion-chart-legend-item.compare .entrada-evolucion-chart-legend-line{border-top-color:#f59e0b;border-top-style:dashed}
+  .entrada-evolucion-chart-tools{display:flex;align-items:center;justify-content:flex-end;gap:12px}
+  .entrada-evolucion-visual-panel{min-height:0;display:flex;flex-direction:column}
+  .entrada-evolucion-chart-share{
+    width:40px;height:40px;min-width:40px;padding:0;border:0;border-radius:11px;
+    background:#fff;color:#17282d;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .16s ease,border-color .16s ease,box-shadow .16s ease
+  }
+  .entrada-evolucion-chart-share:hover,.entrada-evolucion-chart-share:focus-visible{
+    background:var(--soft);box-shadow:none;outline:none
+  }
+  .entrada-evolucion-chart-share svg{width:17px;height:17px;stroke-width:1.8}
+  .entrada-evolucion-chart-fullscreen{
+    width:38px;height:38px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;
+    background:#fff;color:#34545c;cursor:pointer;transition:border-color .16s ease,color .16s ease,background .16s ease
+  }
+  .entrada-evolucion-chart-fullscreen:hover,.entrada-evolucion-chart-fullscreen:focus-visible{
+    color:#007f93;background:#f2fbfc;outline:none
+  }
+  .entrada-evolucion-chart-fullscreen svg{width:18px;height:18px;stroke-width:1.8}
+  .entrada-evolucion-visual-panel:fullscreen{
+    width:100vw;height:100vh;box-sizing:border-box;padding:18px 22px;background:#f5f9fa;display:flex;flex-direction:column;gap:12px;overflow:hidden
+  }
+  .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-mode-row{flex:0 0 auto;margin:0}
+  .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-chart-card{flex:1;height:auto!important;max-height:none;min-height:0}
+  .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-chart-wrap{min-height:0}
+  .entrada-evolucion-chart-wrap{position:relative;min-height:0;flex:1;overflow:visible}
+  #entradaEvolucionChart{display:block;width:100%;height:100%;min-height:0;overflow:visible}
   .entrada-evolucion-grid{stroke:#e8eff1;stroke-width:1}
-  .entrada-evolucion-axis-label{fill:#6b7d82;font-size:12px}
-  .entrada-evolucion-axis-date,
-  .entrada-evolucion-axis-volume{font-size:12px}
-  .entrada-evolucion-line{fill:none;stroke:#0093ab;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-  .entrada-evolucion-line.compare{stroke:#f59e0b}
+  .entrada-evolucion-month-divider{stroke:#dfe7e3;stroke-width:1;opacity:.72;pointer-events:none}
+  .entrada-evolucion-today-line{stroke:#71827b;stroke-width:1.25;stroke-dasharray:4 5;opacity:.52;pointer-events:none}
+  .entrada-evolucion-axis-label{fill:#6b7d82;font-size:14.4px}
+  #entradaEvolucionChart .entrada-evolucion-axis-date{font-size:14.4px}
+  .entrada-evolucion-axis-volume{font-size:14.4px}
+  .entrada-evolucion-line{fill:none;stroke:#0093ab;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;filter:url(#entradaEvolucionBlueGlow)}
+  .entrada-evolucion-line.compare{stroke:#f59e0b;stroke-dasharray:9 6;filter:url(#entradaEvolucionOrangeGlow)}
   .entrada-evolucion-area{fill:url(#entradaEvolucionGradient)}
-  .entrada-evolucion-point{fill:#fff;stroke:#0093ab;stroke-width:2;cursor:pointer}
-  .entrada-evolucion-point:hover{r:5;fill:#0093ab}
+  .entrada-evolucion-point{fill:#fff;stroke:#0093ab;stroke-width:2;cursor:pointer;opacity:0;transition:opacity .12s ease}
+  .entrada-evolucion-point:hover{r:5;fill:#0093ab;opacity:1}
   .entrada-evolucion-point.compare{stroke:#f59e0b}
   .entrada-evolucion-point.compare:hover{fill:#f59e0b}
+  .entrada-evolucion-end-label{font-size:14.4px;font-weight:700;dominant-baseline:middle}
+  .entrada-evolucion-end-label.primary{fill:#007f93}
+  .entrada-evolucion-end-label.compare{fill:#d98208}
+  .entrada-evolucion-end-guide{fill:none;stroke-width:1.25;stroke-linecap:round;stroke-dasharray:3 3;opacity:.7}
+  .entrada-evolucion-end-guide.primary{stroke:#007f93}
+  .entrada-evolucion-end-guide.compare{stroke:#d98208}
   .entrada-evolucion-tooltip{
-    position:absolute;z-index:3;pointer-events:none;transform:translate(-50%,-115%);padding:8px 10px;
-    border-radius:8px;background:#102b32;color:#fff;font-size:11px;line-height:1.45;white-space:nowrap;
+    position:absolute;z-index:50;pointer-events:none;transform:translate(-50%,-115%);padding:8px 10px;
+    border-radius:9px;background:#102b32;color:#fff;font-size:11px;line-height:1.55;white-space:nowrap;
     box-shadow:0 6px 18px rgba(0,0,0,.16)
   }
   /* Entrada > Evolución: Acciones usa exactamente la misma geometría y
@@ -9781,7 +9969,89 @@
     color:#111 !important;
     stroke:currentColor;
   }
+  #view-entrada-evolucion .embarques2-head-actions .clear-imported-data-btn:hover,
+  #view-entrada-evolucion .embarques2-head-actions .clear-imported-data-btn:focus-visible{
+    border-color:var(--red) !important;
+    color:var(--red) !important;
+    background:#fff8f8 !important;
+    box-shadow:inset 0 0 0 3px rgba(199,67,67,.09) !important;
+    outline:none;
+  }
+  #view-entrada-evolucion .embarques2-head-actions .clear-imported-data-btn:hover svg,
+  #view-entrada-evolucion .embarques2-head-actions .clear-imported-data-btn:focus-visible svg{
+    color:var(--red) !important;
+    stroke:currentColor !important;
+  }
+  #view-entrada-evolucion .entrada-evolucion-truck-command{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-left:0;
+  }
+  #view-entrada-evolucion .entrada-evolucion-truck-command .truck-capacity-control{
+    height:40px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:0;
+    border:0;
+    background:transparent;
+    box-shadow:none;
+    white-space:nowrap;
+  }
+  #view-entrada-evolucion .entrada-evolucion-truck-command .truck-capacity-control>span{
+    margin:0;
+    color:var(--ink);
+    font-size:13px;
+    font-weight:700;
+    line-height:1;
+  }
+  #view-entrada-evolucion .entrada-evolucion-truck-command .truck-capacity-control input{
+    width:100px;
+    min-width:100px;
+    height:40px;
+    padding:0 12px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    color:var(--ink);
+    font:700 13px inherit;
+    text-align:right;
+    outline:none;
+  }
+  #view-entrada-evolucion .entrada-evolucion-truck-command .truck-capacity-control input:hover,
+  #view-entrada-evolucion .entrada-evolucion-truck-command .truck-capacity-control input:focus,
+  #view-entrada-evolucion .entrada-evolucion-truck-command .truck-view-toggle:hover,
+  #view-entrada-evolucion .entrada-evolucion-truck-command .truck-view-toggle:focus-visible{
+    border-color:#b8dfe5;
+  }
+  #view-entrada-evolucion .entrada-evolucion-truck-command .truck-view-toggle{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    padding:0;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fff;
+    color:#111;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  #view-entrada-evolucion .entrada-evolucion-truck-command .truck-view-toggle svg{
+    width:18px;
+    height:18px;
+  }
   @media(max-width:900px){
+    #view-entrada-evolucion .entrada-evolucion-mode-row{
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    #view-entrada-evolucion .entrada-evolucion-truck-command{
+      width:auto;
+      margin-left:0;
+    }
     #view-entrada-evolucion .embarques2-head-actions{
       width:100%;
       margin-left:0;
@@ -9790,8 +10060,17 @@
   .entrada-silo-filter{position:relative;min-width:240px}
   .entrada-silo-filter>strong{display:block;margin-bottom:7px;font-size:13px;font-weight:700}
   .entrada-silo-toggle{
-    width:100%;height:38px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;
+    width:100%;height:38px;padding:0 20px 0 12px;display:flex;align-items:center;justify-content:space-between;
     border:1px solid #ccdadd;border-radius:13px;background:#fff;color:#111;font:400 13px inherit;cursor:pointer
+  }
+  #view-entrada-evolucion .entrada-silo-toggle{
+    position:relative;
+    padding-right:46px;
+  }
+  #view-entrada-evolucion .entrada-silo-toggle-chevron{
+    position:absolute;right:20px;top:50%;width:12px;height:8px;
+    transform:translateY(-50%);fill:none;stroke:#14262b;stroke-width:1.5;
+    stroke-linecap:round;stroke-linejoin:round;pointer-events:none
   }
   .entrada-silo-panel{
     position:absolute;z-index:20;top:calc(100% + 6px);left:0;width:300px;padding:10px;
@@ -9805,11 +10084,20 @@
   }
   .entrada-silo-panel-action:hover{border-color:#8fcbd4;background:#f0f9fa}
   .entrada-silo-options{max-height:220px;margin-top:8px;overflow:auto;display:grid;gap:3px}
-  .entrada-silo-option{display:flex;align-items:center;gap:8px;padding:7px 6px;border-radius:7px;font-size:12px;cursor:pointer}
+  .entrada-silo-option{
+    display:flex;align-items:center;gap:8px;min-height:30px;padding:4px 6px;
+    border-radius:7px;font-size:12px;line-height:1.25;cursor:pointer
+  }
+  .entrada-silo-option input[type="checkbox"],
+  .entrada-import-filter-field .entrada-silo-option input[type="checkbox"]{
+    flex:0 0 16px;width:16px;height:16px;min-width:16px;margin:0;padding:0;
+    border-radius:3px;box-shadow:none
+  }
+  .entrada-silo-option span{min-width:0;overflow-wrap:anywhere}
   .entrada-silo-option:hover{background:#f0f9fa}
   .entrada-silo-empty{padding:10px 6px;color:#718287;font-size:12px}
   .entrada-import-filter-step{
-    width:min(620px,100%);margin:18px auto 0;padding:18px;border:1px solid #dce7e9;border-radius:16px;
+    width:100%;margin:18px auto 0;padding:18px;border:1px solid #dce7e9;border-radius:16px;
     background:#f8fbfc;text-align:left
   }
   .entrada-import-filter-step[hidden]{display:none}
@@ -9825,8 +10113,8 @@
   .entrada-import-filter-field input:focus{border-color:#0093ab;box-shadow:0 0 0 3px rgba(0,147,171,.12)}
   .entrada-import-filter-field.entrada-silo-filter{display:block;position:relative}
   .entrada-import-filter-field.entrada-silo-filter>strong{margin-bottom:7px}
-  .entrada-import-filter-field .entrada-silo-panel{width:100%;max-width:none}
-  .entrada-import-filter-period{grid-column:2}
+  .entrada-import-filter-field .entrada-silo-panel{width:100%;min-width:300px;max-width:none}
+  .entrada-import-filter-period{grid-column:1 / -1}
   .entrada-import-filter-silo{grid-column:1}
   .entrada-import-filter-period>strong{
     color:#000;
@@ -9836,6 +10124,17 @@
   .entrada-import-filter-period-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .entrada-import-filter-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
   .entrada-import-filter-actions .btn{min-width:120px}
+  #entradaImportProgressOverlay{
+    overflow-y:auto;
+  }
+  #entradaImportProgressOverlay .embarques2-import-progress-card:has(#entradaImportFilterStep:not([hidden])){
+    width:min(760px,calc(100vw - 32px));
+    max-height:calc(100vh - 32px);
+    overflow:visible;
+  }
+  #entradaImportProgressOverlay .embarques2-import-progress-card:has(#entradaImportFilterStep:not([hidden])) .entrada-silo-options{
+    max-height:156px;
+  }
   @media(max-width:720px){
     .entrada-evolucion-toolbar{align-items:stretch}
     .entrada-evolucion-filters,.entrada-evolucion-project-filter,.entrada-evolucion-project-filter select,.entrada-silo-filter{width:100%;min-width:0}
@@ -9847,6 +10146,11 @@
     .entrada-import-filter-grid{grid-template-columns:1fr}
     .entrada-import-filter-period-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
     .entrada-import-filter-period{grid-column:auto}
+    .entrada-import-filter-field .entrada-silo-panel{min-width:0}
+    #entradaImportProgressOverlay .embarques2-import-progress-card:has(#entradaImportFilterStep:not([hidden])){
+      max-height:none;
+      overflow:visible;
+    }
   }
   @media(max-width:1180px){
     .entrada-evolucion-toolbar{grid-template-columns:1fr}
@@ -10817,6 +11121,26 @@
 </style>
 </head>
 <body>
+<script>
+  /* A animação inicial só é ativada quando já existe conteúdo desta
+     aplicação para restaurar. Em um navegador novo, o login abre direto. */
+  try{
+    if(
+      localStorage.getItem("plan_diario_embarques_v50_base_limpa_admin")||
+      localStorage.getItem("plan_embarques_demo_session_v65")||
+      sessionStorage.getItem("plan_embarques_demo_session_v65")
+    ){
+      document.body.classList.add("boot-restoring");
+    }
+  }catch(error){}
+</script>
+<div class="initial-loading-screen" id="initialLoadingScreen" role="status" aria-live="polite" aria-label="Carregando dados salvos">
+  <div class="initial-loading-content">
+    <div class="initial-loading-spinner" aria-hidden="true"></div>
+    <strong>Carregando dados...</strong>
+    <span>Preparando as informações salvas neste navegador</span>
+  </div>
+</div>
 <aside class="sidebar" id="sidebar" aria-label="Menú principal">
   <div class="sidebar-head">
     <div class="sidebar-brand">
@@ -10969,21 +11293,18 @@
         <button class="refresh-data-btn" id="refreshEntradaEvolucion" type="button" title="Actualizar evolución" aria-label="Actualizar evolución">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M5.5 9a7 7 0 0 1 12.3-2.5L20 9M18.5 15a7 7 0 0 1-12.3 2.5L4 15"/></svg>
         </button>
-        <button class="refresh-data-btn entrada-save-datos-btn" id="saveEntradaEvolucionDatos" type="button" title="Guardar Proyecto y Silo en Datos" aria-label="Guardar Proyecto y Silo en Datos">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M5.5 9a7 7 0 0 1 12.3-2.5L20 9M18.5 15a7 7 0 0 1-12.3 2.5L4 15"/></svg>
-        </button>
-        <button class="refresh-data-btn" id="shareEntradaEvolucion" type="button" title="Compartir gráfico de evolución" aria-label="Compartir gráfico de evolución">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>
+        <button class="clear-imported-data-btn" id="clearEntradaEvolucionImportedData" type="button" title="Limpiar datos importados" aria-label="Limpiar datos importados">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>
         </button>
       </div>
     </div>
     <input type="file" id="entradaEvolucionImportInput" accept=".xlsx,.xls,.csv" hidden>
     <div class="embarques2-empty-state" id="entradaEvolucionEmptyState" role="status">
-      <h2>Importe el archivo de Entrada</h2>
-      <p>Este archivo es independiente de los archivos utilizados en Salidas.</p>
+      <h2>Aún no hay datos de entrada</h2>
+      <p>Importe el archivo de Entrada para comenzar.</p>
       <button class="btn btn-primary embarques2-empty-import-btn" id="importEntradaEvolucionEmpty" type="button">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10m0 0-4-4m4 4 4-4"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
-        Importar archivo
+        <span class="entrada-evolucion-empty-import-label">Importar datos</span>
       </button>
     </div>
     <div class="entrada-evolucion-content" id="entradaEvolucionContent" hidden>
@@ -11000,7 +11321,8 @@
           <div class="entrada-silo-filter">
             <strong>Silo</strong>
             <button class="entrada-silo-toggle" id="entradaEvolucionSiloToggle" type="button" aria-expanded="false">
-              <span id="entradaEvolucionSiloLabel">Todos los silos</span><span>⌄</span>
+              <span id="entradaEvolucionSiloLabel">Todos los silos</span>
+              <svg class="entrada-silo-toggle-chevron" width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"><path d="M1.5 1.5 6 6l4.5-4.5"/></svg>
             </button>
             <div class="entrada-silo-panel" id="entradaEvolucionSiloPanel" hidden>
               <input class="entrada-silo-search" id="entradaEvolucionSiloSearch" type="search" placeholder="Buscar silo por nombre">
@@ -11013,14 +11335,19 @@
           </div>
           <div class="entrada-evolucion-period-filter embarques2-period-filter" aria-label="Período de entrada">
             <strong class="entrada-evolucion-period-title">Período</strong>
-            <div class="embarques2-date-range-control">
-              <div class="embarques2-date-range-field">
-                <input type="date" id="entradaEvolucionDateFrom" aria-label="Fecha inicial de entrada">
+            <div class="entrada-evolucion-period-slider">
+              <div class="entrada-evolucion-period-values">
+                <span id="entradaEvolucionPeriodFromLabel">—</span>
+                <span id="entradaEvolucionPeriodToLabel">—</span>
               </div>
-              <div class="embarques2-date-range-field">
-                <input type="date" id="entradaEvolucionDateTo" aria-label="Fecha final de entrada">
+              <div class="entrada-evolucion-period-track">
+                <span class="entrada-evolucion-period-selection" id="entradaEvolucionPeriodSelection"></span>
+                <input type="range" id="entradaEvolucionMonthFrom" min="0" max="11" step="1" value="0" aria-label="Mes inicial">
+                <input type="range" id="entradaEvolucionMonthTo" min="0" max="11" step="1" value="11" aria-label="Mes final">
               </div>
             </div>
+            <input type="hidden" id="entradaEvolucionDateFrom">
+            <input type="hidden" id="entradaEvolucionDateTo">
           </div>
         </div>
         <div class="entrada-evolucion-summary" aria-label="Resumen de entrada">
@@ -11029,18 +11356,44 @@
           <div><span>Silos</span><strong id="entradaEvolucionSilos">0</strong></div>
         </div>
       </div>
+      <div class="entrada-evolucion-visual-panel" id="entradaEvolucionVisualPanel">
+      <div class="entrada-evolucion-mode-row">
+        <div class="entrada-evolucion-mode-toggle" id="entradaEvolucionModeToggle" role="group" aria-label="Tipo de evolución">
+          <button class="entrada-evolucion-mode-button is-active" type="button" data-entrada-evolucion-mode="acumulada" aria-pressed="true">Acumulada</button>
+          <button class="entrada-evolucion-mode-button" type="button" data-entrada-evolucion-mode="diaria" aria-pressed="false">Diaria</button>
+        </div>
+        <div class="entrada-evolucion-truck-command" aria-label="Simulación de camiones en evolución">
+          <label class="truck-capacity-control" for="truckCapacityKgEntradaEvolucion">
+            <span>Kg por camión</span>
+            <input id="truckCapacityKgEntradaEvolucion" type="text" inputmode="numeric" value="33.000" aria-label="Capacidad estimada por camión en kilogramos" title="Capacidad usada para la simulación">
+          </label>
+          <button class="truck-view-toggle" id="toggleTruckViewEntradaEvolucion" type="button" aria-pressed="false" title="Ver en camiones" aria-label="Ver en camiones">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7zM6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>
+          </button>
+        </div>
+      </div>
       <div class="entrada-evolucion-chart-card">
         <div class="entrada-evolucion-chart-head">
           <div>
-            <h2>Evolución de Entrada</h2>
+            <h2 id="entradaEvolucionChartTitle">Evolución acumulada diaria</h2>
             <p id="entradaEvolucionChartSubtitle">Volumen diario en kg</p>
+            <div class="entrada-evolucion-chart-legend" id="entradaEvolucionChartLegend" aria-label="Leyenda del gráfico" hidden></div>
           </div>
-          <div class="entrada-evolucion-legend" id="entradaEvolucionLegend"></div>
+          <div class="entrada-evolucion-chart-tools">
+            <button class="entrada-evolucion-chart-fullscreen" id="fullscreenEntradaEvolucion" type="button" title="Ver gráfico en pantalla completa" aria-label="Ver gráfico en pantalla completa" aria-pressed="false">
+              <svg class="fullscreen-expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+              <svg class="fullscreen-collapse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/></svg>
+            </button>
+            <button class="entrada-evolucion-chart-share" id="shareEntradaEvolucion" type="button" title="Compartir gráfico de evolución" aria-label="Compartir gráfico de evolución">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>
+            </button>
+          </div>
         </div>
         <div class="entrada-evolucion-chart-wrap">
           <svg id="entradaEvolucionChart" role="img" aria-label="Gráfico de línea de evolución de entrada"></svg>
           <div class="entrada-evolucion-tooltip" id="entradaEvolucionTooltip" hidden></div>
         </div>
+      </div>
       </div>
     </div>
   </section>
@@ -11930,7 +12283,7 @@
    versões anteriores voltem a preencher as telas. */
 const STORAGE_KEY="plan_diario_embarques_v50_base_limpa_admin";
 const SESSION_KEY="plan_embarques_demo_session_v65";
-const SIDEBAR_PREF_KEY="plan_embarques_sidebar_collapsed_v81";
+const SIDEBAR_PREF_KEY="plan_embarques_sidebar_collapsed_v82";
 const TRUCK_SIMULATION_KEY="plan_embarques_truck_simulation_v98";
 const DEFAULT_TRUCK_CAPACITY_KG=33000;
 const DEFAULT_OPERATION_USER_ID=2;
@@ -12294,7 +12647,7 @@ const DATABASE_FLOWS=[
   {screen:"Interfaz",action:"Mostrar o recolher menú lateral",table:"localStorage",fields:["sidebarCollapsed"],effect:"Guarda solamente la preferencia visual del menú lateral. Al recolherlo, mantiene una franja con los botones de menú y perfil; no altera datos operativos."},
   {screen:"Interfaz",action:"Abrir menú del perfil",table:"sessionStorage",fields:["authenticatedUserId","contextUserId"],effect:"El perfil se muestra en la parte inferior del menú lateral. Permite abrir Mi perfil, Cambiar contexto y Cerrar sesión sin crear datos duplicados."},
   {screen:"Administrativo",action:"Guardar jerarquía",table:"jerarquia_contexto",fields:["managerUserId","targetUserId"],effect:"Define las opciones disponibles en Cambiar contexto."},
-  {screen:"Login",action:"Iniciar sesión",table:"sessionStorage",fields:["authenticatedUserId","contextUserId"],effect:"Mantiene la sesión solamente durante la pestaña actual del navegador."}
+  {screen:"Login",action:"Iniciar sesión",table:"localStorage",fields:["authenticatedUserId","contextUserId"],effect:"Mantiene la sesión en este navegador sin guardar la contraseña. Cerrar sesión elimina esta identificación persistente."}
 ];
 
 const DATABASE_RELATION_GROUPS=[
@@ -12546,7 +12899,8 @@ function updateLoginAvailability(inputId,statusId,excludeUserId=null){
 
 function loadAuthSession(){
   try{
-    const parsed=JSON.parse(sessionStorage.getItem(SESSION_KEY)||"null");
+    const saved=localStorage.getItem(SESSION_KEY)||sessionStorage.getItem(SESSION_KEY);
+    const parsed=JSON.parse(saved||"null");
     if(!parsed||!Number(parsed.authenticatedUserId))return {authenticatedUserId:null,contextUserId:null};
     return {
       authenticatedUserId:Number(parsed.authenticatedUserId),
@@ -12557,11 +12911,17 @@ function loadAuthSession(){
   }
 }
 function saveAuthSession(){
-  try{sessionStorage.setItem(SESSION_KEY,JSON.stringify(authSession))}catch(e){}
+  try{
+    localStorage.setItem(SESSION_KEY,JSON.stringify(authSession));
+    sessionStorage.removeItem(SESSION_KEY);
+  }catch(e){}
 }
 function clearAuthSession(){
   authSession={authenticatedUserId:null,contextUserId:null};
-  try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}
+  try{
+    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+  }catch(e){}
 }
 function authenticatedUser(){
   return byId(db.users,authSession.authenticatedUserId);
@@ -12678,7 +13038,7 @@ function availableContextUsers(){
 }
 function ensureContextAllowed(){
   const authenticated=authenticatedUser();
-  if(!authenticated){
+  if(!authenticated||authenticated.active===false){
     clearAuthSession();
     return false;
   }
@@ -13527,10 +13887,10 @@ function hasPendingOperationChanges(){
   return $$(".field-save-btn[data-save-operation-field]").some(button=>!button.hidden);
 }
 function updateTruckSimulationControls(){
-  [$("#truckCapacityKg"),$("#truckCapacityKgExport"),$("#truckCapacityKgNational"),$("#truckCapacityKgEmbarques2"),$("#truckCapacityKgEmbarques2Nacional"),$("#truckCapacityKgEmbarques2Exportacion")].forEach(capacityInput=>{
+  [$("#truckCapacityKg"),$("#truckCapacityKgExport"),$("#truckCapacityKgNational"),$("#truckCapacityKgEmbarques2"),$("#truckCapacityKgEmbarques2Nacional"),$("#truckCapacityKgEmbarques2Exportacion"),$("#truckCapacityKgEntradaEvolucion")].forEach(capacityInput=>{
     if(capacityInput&&document.activeElement!==capacityInput)capacityInput.value=kg(truckCapacityKg());
   });
-  [$("#toggleTruckView"),$("#toggleTruckViewEmbarques2"),$("#toggleTruckViewEmbarques2Nacional"),$("#toggleTruckViewEmbarques2Exportacion")].forEach(toggle=>{
+  [$("#toggleTruckView"),$("#toggleTruckViewEmbarques2"),$("#toggleTruckViewEmbarques2Nacional"),$("#toggleTruckViewEmbarques2Exportacion"),$("#toggleTruckViewEntradaEvolucion")].forEach(toggle=>{
     if(!toggle)return;
     toggle.classList.toggle("active",truckSimulation.showTrucks);
     toggle.setAttribute("aria-pressed",String(truckSimulation.showTrucks));
@@ -13553,6 +13913,7 @@ function setTruckCapacityFromInput(value){
   renderSummaryPreview();
   renderAnalysisExport();
   renderAnalysisNational();
+  renderEntradaEvolucion();
 }
 function toggleTruckView(){
   if(!truckSimulation.showTrucks&&hasPendingOperationChanges()){
@@ -13564,6 +13925,7 @@ function toggleTruckView(){
   updateTruckSimulationControls();
   if($("#dailyTable"))renderDailyTable();
   renderSummaryPreview();
+  renderEntradaEvolucion();
 }
 function parseCoordinateInput(value){
   const normalized=String(value??"").trim().replace(",", ".");
@@ -16602,9 +16964,112 @@ async function runAnimatedEmbarques2Import(files){
 
 let activeEntradaEvolucionProject="";
 let compareEntradaEvolucionProject="";
+let entradaEvolucionMode="acumulada";
 let selectedEntradaEvolucionSilos=new Set();
+const ENTRADA_EVOLUCION_FILTERS_KEY="planEmbarque.entradaEvolucion.filters.v1";
+let entradaEvolucionFiltersRestored=false;
+function readEntradaEvolucionFilters(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(ENTRADA_EVOLUCION_FILTERS_KEY)||"null");
+    return saved&&typeof saved==="object"?saved:null;
+  }catch(error){
+    console.warn("No se pudieron recuperar los últimos filtros de Evolución.",error);
+    return null;
+  }
+}
+function restoreEntradaEvolucionFilters(projects){
+  if(entradaEvolucionFiltersRestored)return;
+  entradaEvolucionFiltersRestored=true;
+  const saved=readEntradaEvolucionFilters();
+  if(!saved)return;
+  activeEntradaEvolucionProject=projects.includes(saved.project)?saved.project:"";
+  compareEntradaEvolucionProject=projects.includes(saved.compare)&&saved.compare!==activeEntradaEvolucionProject?saved.compare:"";
+  selectedEntradaEvolucionSilos=new Set(Array.isArray(saved.silos)?saved.silos.map(String):[]);
+  if(saved.mode==="acumulada"||saved.mode==="diaria")entradaEvolucionMode=saved.mode;
+  const fromRange=$("#entradaEvolucionMonthFrom");
+  const toRange=$("#entradaEvolucionMonthTo");
+  if(fromRange&&Number.isInteger(Number(saved.monthFrom)))fromRange.value=String(Math.max(0,Math.min(11,Number(saved.monthFrom))));
+  if(toRange&&Number.isInteger(Number(saved.monthTo)))toRange.value=String(Math.max(0,Math.min(11,Number(saved.monthTo))));
+  syncEntradaEvolucionPeriodSlider();
+}
+function saveEntradaEvolucionFilters(){
+  try{
+    localStorage.setItem(ENTRADA_EVOLUCION_FILTERS_KEY,JSON.stringify({
+      project:activeEntradaEvolucionProject,
+      compare:compareEntradaEvolucionProject,
+      silos:[...selectedEntradaEvolucionSilos],
+      monthFrom:Number($("#entradaEvolucionMonthFrom")?.value??0),
+      monthTo:Number($("#entradaEvolucionMonthTo")?.value??11),
+      mode:entradaEvolucionMode
+    }));
+  }catch(error){
+    console.warn("No se pudieron guardar los filtros de Evolución.",error);
+  }
+}
 let selectedEntradaImportSilos=new Set();
 let entradaImportAvailableSilos=[];
+const ENTRADA_EVOLUCION_FILE_DB="plan_embarque_entrada_import";
+const ENTRADA_EVOLUCION_FILE_STORE="files";
+const ENTRADA_EVOLUCION_FILE_KEY="last-import";
+function openEntradaEvolucionFileDB(){
+  return new Promise((resolve,reject)=>{
+    if(!("indexedDB" in window)){reject(new Error("IndexedDB no disponible."));return;}
+    const request=indexedDB.open(ENTRADA_EVOLUCION_FILE_DB,1);
+    request.onupgradeneeded=()=>{
+      const database=request.result;
+      if(!database.objectStoreNames.contains(ENTRADA_EVOLUCION_FILE_STORE)){
+        database.createObjectStore(ENTRADA_EVOLUCION_FILE_STORE);
+      }
+    };
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error||new Error("No se pudo abrir el almacenamiento del navegador."));
+  });
+}
+async function persistEntradaEvolucionImportFile(file){
+  if(!file)return;
+  const database=await openEntradaEvolucionFileDB();
+  await new Promise((resolve,reject)=>{
+    const transaction=database.transaction(ENTRADA_EVOLUCION_FILE_STORE,"readwrite");
+    transaction.objectStore(ENTRADA_EVOLUCION_FILE_STORE).put({
+      blob:file,
+      name:String(file.name||"entrada.xlsx"),
+      type:String(file.type||"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+      lastModified:Number(file.lastModified||Date.now())
+    },ENTRADA_EVOLUCION_FILE_KEY);
+    transaction.oncomplete=resolve;
+    transaction.onerror=()=>reject(transaction.error||new Error("No se pudo guardar el archivo importado."));
+  });
+  database.close();
+}
+async function readPersistedEntradaEvolucionImportFile(){
+  const database=await openEntradaEvolucionFileDB();
+  const saved=await new Promise((resolve,reject)=>{
+    const request=database.transaction(ENTRADA_EVOLUCION_FILE_STORE,"readonly")
+      .objectStore(ENTRADA_EVOLUCION_FILE_STORE).get(ENTRADA_EVOLUCION_FILE_KEY);
+    request.onsuccess=()=>resolve(request.result||null);
+    request.onerror=()=>reject(request.error||new Error("No se pudo recuperar el archivo importado."));
+  });
+  database.close();
+  if(!saved?.blob)return null;
+  return new File([saved.blob],saved.name||"entrada.xlsx",{
+    type:saved.type||saved.blob.type,
+    lastModified:saved.lastModified||Date.now()
+  });
+}
+async function clearPersistedEntradaEvolucionImportFile(){
+  try{
+    const database=await openEntradaEvolucionFileDB();
+    await new Promise((resolve,reject)=>{
+      const transaction=database.transaction(ENTRADA_EVOLUCION_FILE_STORE,"readwrite");
+      transaction.objectStore(ENTRADA_EVOLUCION_FILE_STORE).delete(ENTRADA_EVOLUCION_FILE_KEY);
+      transaction.oncomplete=resolve;
+      transaction.onerror=()=>reject(transaction.error);
+    });
+    database.close();
+  }catch(error){
+    console.warn("No se pudo limpiar el último archivo de Entrada.",error);
+  }
+}
 async function parseEntradaEvolucionFile(file){
   const buffer=await file.arrayBuffer();
   const zip=xlsxParseZip(buffer);
@@ -16646,6 +17111,79 @@ async function parseEntradaEvolucionFile(file){
 function entradaEvolucionProjects(){
   return [...new Set((db.entradaEvolucion||[]).map(item=>String(item.project||"").trim()).filter(Boolean))]
     .sort((a,b)=>a.localeCompare(b,"es",{numeric:true,sensitivity:"base"}));
+}
+function entradaEvolucionMonthIndex(date){
+  const match=String(date||"").match(/^(\d{4})-(\d{2})/);
+  return match?Number(match[1])*12+Number(match[2])-1:0;
+}
+function entradaEvolucionProjectYear(project){
+  const projectText=String(project||"");
+  const namedYears=projectText.match(/\b(?:19|20)\d{2}\b/g);
+  if(namedYears?.length)return Number(namedYears[namedYears.length-1]);
+  const projectDates=(db.entradaEvolucion||[])
+    .filter(item=>String(item.project||"")===projectText)
+    .map(item=>Number(String(item.date||"").slice(0,4)))
+    .filter(year=>Number.isFinite(year)&&year>1900);
+  return projectDates.length?projectDates[0]:new Date().getFullYear();
+}
+function entradaEvolucionMonthValue(index,end=false){
+  const year=Math.floor(Number(index)/12);
+  const month=((Number(index)%12)+12)%12+1;
+  const lastDay=new Date(year,month,0).getDate();
+  return `${year}-${String(month).padStart(2,"0")}-${end?String(lastDay).padStart(2,"0"):"01"}`;
+}
+function formatEntradaEvolucionMonth(monthIndex,year){
+  const names=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  return `${names[Number(monthIndex)]} ${year}`;
+}
+function syncEntradaEvolucionPeriodSlider(){
+  const fromRange=$("#entradaEvolucionMonthFrom");
+  const toRange=$("#entradaEvolucionMonthTo");
+  if(!fromRange||!toRange)return;
+  let from=Number(fromRange.value),to=Number(toRange.value);
+  if(from>to){
+    if(document.activeElement===fromRange)to=from;
+    else from=to;
+  }
+  fromRange.value=String(from);
+  toRange.value=String(to);
+  const fromYear=entradaEvolucionProjectYear(activeEntradaEvolucionProject);
+  const toYear=entradaEvolucionProjectYear(compareEntradaEvolucionProject||activeEntradaEvolucionProject);
+  const dateFrom=$("#entradaEvolucionDateFrom");
+  const dateTo=$("#entradaEvolucionDateTo");
+  if(dateFrom)dateFrom.value=entradaEvolucionMonthValue(fromYear*12+from,false);
+  if(dateTo)dateTo.value=entradaEvolucionMonthValue(toYear*12+to,true);
+  if($("#entradaEvolucionPeriodFromLabel"))$("#entradaEvolucionPeriodFromLabel").textContent=formatEntradaEvolucionMonth(from,fromYear);
+  if($("#entradaEvolucionPeriodToLabel"))$("#entradaEvolucionPeriodToLabel").textContent=formatEntradaEvolucionMonth(to,toYear);
+  const min=Number(fromRange.min),max=Number(fromRange.max),span=Math.max(1,max-min);
+  const left=((from-min)/span)*100,right=((to-min)/span)*100;
+  const selection=$("#entradaEvolucionPeriodSelection");
+  if(selection){selection.style.left=`${left}%`;selection.style.width=`${Math.max(0,right-left)}%`;}
+}
+function syncEntradaEvolucionPeriodToSelectedProjects(){
+  const primaryDates=(db.entradaEvolucion||[])
+    .filter(item=>String(item.project||"")===activeEntradaEvolucionProject)
+    .map(item=>String(item.date||""))
+    .filter(date=>/^\d{4}-\d{2}-\d{2}$/.test(date));
+  const comparisonProject=compareEntradaEvolucionProject||activeEntradaEvolucionProject;
+  const comparisonDates=(db.entradaEvolucion||[])
+    .filter(item=>String(item.project||"")===comparisonProject)
+    .map(item=>String(item.date||""))
+    .filter(date=>/^\d{4}-\d{2}-\d{2}$/.test(date));
+  const fromRange=$("#entradaEvolucionMonthFrom");
+  const toRange=$("#entradaEvolucionMonthTo");
+  if(fromRange&&toRange&&(primaryDates.length||comparisonDates.length)){
+    const primaryMonths=primaryDates.map(date=>Number(date.slice(5,7))-1);
+    const comparisonMonths=comparisonDates.map(date=>Number(date.slice(5,7))-1);
+    const from=Math.min(...(primaryMonths.length?primaryMonths:comparisonMonths));
+    const to=Math.max(...(comparisonMonths.length?comparisonMonths:primaryMonths));
+    fromRange.min=toRange.min="0";
+    fromRange.max=toRange.max="11";
+    fromRange.step=toRange.step="1";
+    fromRange.value=String(from);
+    toRange.value=String(Math.max(from,to));
+    syncEntradaEvolucionPeriodSlider();
+  }
 }
 function entradaEvolucionAvailableSilos(){
   const selectedProjects=new Set([activeEntradaEvolucionProject,compareEntradaEvolucionProject].filter(Boolean));
@@ -16698,19 +17236,44 @@ function renderEntradaImportSiloOptions(){
 }
 function renderEntradaEvolucion(){
   const records=Array.isArray(db.entradaEvolucion)?db.entradaEvolucion:[];
+  const hasImportedRecords=records.length>0;
+  const importLabel=hasImportedRecords?"Reimportar":"Importar";
+  const importTitle=`${importLabel} archivo de Entrada`;
+  const headerImport=$("#importEntradaEvolucion");
+  const sidebarImport=$("#sidebarImportEntradaEvolucion");
+  const emptyImport=$("#importEntradaEvolucionEmpty");
+  if(headerImport){
+    headerImport.title=importTitle;
+    headerImport.setAttribute("aria-label",importTitle);
+  }
+  if(sidebarImport){
+    sidebarImport.title=importTitle;
+    sidebarImport.setAttribute("aria-label",importTitle);
+  }
+  if(emptyImport){
+    const label=emptyImport.querySelector(".entrada-evolucion-empty-import-label");
+    if(label)label.textContent=`${importLabel} datos`;
+    emptyImport.title=importTitle;
+    emptyImport.setAttribute("aria-label",importTitle);
+  }
+  const view=$("#view-entrada-evolucion");
   const empty=$("#entradaEvolucionEmptyState");
   const content=$("#entradaEvolucionContent");
+  if(view)view.classList.toggle("is-empty",!records.length);
   if(empty)empty.hidden=records.length>0;
   if(content)content.hidden=!records.length;
   if(!records.length)return;
+  requestAnimationFrame(syncEntradaEvolucionChartHeight);
   const projects=entradaEvolucionProjects();
-  if(!projects.includes(activeEntradaEvolucionProject))activeEntradaEvolucionProject=projects[0]||"";
+  restoreEntradaEvolucionFilters(projects);
+  if(activeEntradaEvolucionProject&&!projects.includes(activeEntradaEvolucionProject))activeEntradaEvolucionProject="";
   if(compareEntradaEvolucionProject&&(!projects.includes(compareEntradaEvolucionProject)||compareEntradaEvolucionProject===activeEntradaEvolucionProject)){
     compareEntradaEvolucionProject="";
   }
   const select=$("#entradaEvolucionProject");
   if(select){
-    select.innerHTML=projects.map(name=>`<option value="${esc(name)}" ${name===activeEntradaEvolucionProject?"selected":""}>${esc(name)}</option>`).join("");
+    select.innerHTML=`<option value="" ${!activeEntradaEvolucionProject?"selected":""}>Seleccione un proyecto</option>`+
+      projects.map(name=>`<option value="${esc(name)}" ${name===activeEntradaEvolucionProject?"selected":""}>${esc(name)}</option>`).join("");
   }
   const compareSelect=$("#entradaEvolucionCompareProject");
   if(compareSelect){
@@ -16718,16 +17281,28 @@ function renderEntradaEvolucion(){
       projects.filter(name=>name!==activeEntradaEvolucionProject).map(name=>`<option value="${esc(name)}" ${name===compareEntradaEvolucionProject?"selected":""}>${esc(name)}</option>`).join("");
     compareSelect.disabled=false;
   }
+  if(!$("#entradaEvolucionDateFrom")?.value&&!$("#entradaEvolucionDateTo")?.value){
+    syncEntradaEvolucionPeriodToSelectedProjects();
+  }
   const availableSilos=new Set(entradaEvolucionAvailableSilos());
   selectedEntradaEvolucionSilos=new Set([...selectedEntradaEvolucionSilos].filter(name=>availableSilos.has(name)));
   renderEntradaEvolucionSiloOptions();
   const dateFromRaw=$("#entradaEvolucionDateFrom")?.value||"";
   const dateToRaw=$("#entradaEvolucionDateTo")?.value||"";
-  const [dateFrom,dateTo]=dateFromRaw&&dateToRaw&&dateFromRaw>dateToRaw
-    ?[dateToRaw,dateFromRaw]
-    :[dateFromRaw,dateToRaw];
-  const dateMatches=item=>(!dateFrom||String(item.date||"")>=dateFrom)
-    &&(!dateTo||String(item.date||"")<=dateTo);
+  const monthDay=value=>{
+    const parts=String(value||"").split("-");
+    return parts.length===3?`${parts[1]}-${parts[2]}`:String(value||"");
+  };
+  const rawFromDay=monthDay(dateFromRaw);
+  const rawToDay=monthDay(dateToRaw);
+  const [dateFromDay,dateToDay]=rawFromDay&&rawToDay&&rawFromDay>rawToDay
+    ?[rawToDay,rawFromDay]
+    :[rawFromDay,rawToDay];
+  const dateMatches=item=>{
+    const itemMonth=String(item.date||"").slice(5,7);
+    return (!rawFromDay||itemMonth>=rawFromDay.slice(0,2))
+      &&(!rawToDay||itemMonth<=rawToDay.slice(0,2));
+  };
   const siloMatches=item=>!selectedEntradaEvolucionSilos.size||selectedEntradaEvolucionSilos.has(item.silo);
   const filtered=records.filter(item=>item.project===activeEntradaEvolucionProject&&dateMatches(item)&&siloMatches(item));
   const compared=compareEntradaEvolucionProject?records.filter(item=>item.project===compareEntradaEvolucionProject&&dateMatches(item)&&siloMatches(item)):[];
@@ -16753,71 +17328,282 @@ function renderEntradaEvolucion(){
       <span class="entrada-summary-project"><i></i><span>${esc(compareEntradaEvolucionProject)}</span></span>
       <b class="entrada-summary-value">${esc(compareValue)}${suffix}</b>
     </span>`:""}`;
-  if($("#entradaEvolucionTotal"))$("#entradaEvolucionTotal").innerHTML=summaryRows(`${kg(total)} kg`,`${kg(compareTotal)} kg`);
-  if($("#entradaEvolucionCount"))$("#entradaEvolucionCount").innerHTML=summaryRows(kg(filtered.length),kg(compared.length));
+  const summaryDifference=(primaryValue,compareValue)=>{
+    if(!compareEntradaEvolucionProject)return "";
+    const primary=Number(primaryValue)||0;
+    const comparison=Number(compareValue)||0;
+    if(!comparison){
+      return `<span class="entrada-summary-difference"><span>Diferencia</span><b>—</b></span>`;
+    }
+    const percentage=((primary-comparison)/comparison)*100;
+    const state=percentage>0?"is-positive":percentage<0?"is-negative":"";
+    const arrow=percentage>0?"↑":percentage<0?"↓":"";
+    const formatted=Math.abs(percentage).toLocaleString("es-PY",{minimumFractionDigits:1,maximumFractionDigits:1});
+    return `<span class="entrada-summary-difference ${state}"><span>Diferencia</span><b>${arrow} ${formatted}%</b></span>`;
+  };
+  const evolutionValue=value=>truckSimulation.showTrucks
+    ?truckCountPlain(value)
+    :`${new Intl.NumberFormat("es-PY",{maximumFractionDigits:0}).format(Number(value||0)/1000)} ton`;
+  if($("#entradaEvolucionTotal"))$("#entradaEvolucionTotal").innerHTML=summaryRows(evolutionValue(total),evolutionValue(compareTotal))+summaryDifference(total,compareTotal);
+  if($("#entradaEvolucionCount"))$("#entradaEvolucionCount").innerHTML=summaryRows(kg(filtered.length),kg(compared.length))+summaryDifference(filtered.length,compared.length);
   if($("#entradaEvolucionSilos"))$("#entradaEvolucionSilos").innerHTML=summaryRows(kg(siloCount),kg(compareSiloCount));
-  if($("#entradaEvolucionChartSubtitle"))$("#entradaEvolucionChartSubtitle").textContent=compareEntradaEvolucionProject?`Volumen diario en kg · comparación por día y mes (sin considerar el año)`:`Volumen diario en kg · ${activeEntradaEvolucionProject}`;
-  const legend=$("#entradaEvolucionLegend");
-  if(legend)legend.innerHTML=`<span><i></i>${esc(activeEntradaEvolucionProject)}</span>${compareEntradaEvolucionProject?`<span><i class="compare-dot"></i>${esc(compareEntradaEvolucionProject)}</span>`:""}`;
+  const isAccumulated=entradaEvolucionMode==="acumulada";
+  const chartTitle=$("#entradaEvolucionChartTitle");
+  if(chartTitle)chartTitle.textContent=isAccumulated?"Evolución acumulada diaria":"Evolución de entrada diaria";
+  if($("#entradaEvolucionChartSubtitle"))$("#entradaEvolucionChartSubtitle").textContent="";
+  const chartLegend=$("#entradaEvolucionChartLegend");
+  if(chartLegend){
+    chartLegend.hidden=isAccumulated;
+    chartLegend.innerHTML=isAccumulated?"":`<span class="entrada-evolucion-chart-legend-item">
+      <i class="entrada-evolucion-chart-legend-line"></i><span>${esc(activeEntradaEvolucionProject)}</span>
+    </span>${compareEntradaEvolucionProject?`<span class="entrada-evolucion-chart-legend-item compare">
+      <i class="entrada-evolucion-chart-legend-line"></i><span>${esc(compareEntradaEvolucionProject)}</span>
+    </span>`:""}`;
+  }
+  document.querySelectorAll("[data-entrada-evolucion-mode]").forEach(button=>{
+    const active=button.dataset.entradaEvolucionMode===entradaEvolucionMode;
+    button.classList.toggle("is-active",active);
+    button.setAttribute("aria-pressed",String(active));
+  });
   renderEntradaEvolucionChart(daily,compareDaily);
 }
-function renderEntradaEvolucionChart(daily,compareDaily=[]){
+function syncEntradaEvolucionChartHeight(){
+  const card=document.querySelector("#view-entrada-evolucion .entrada-evolucion-chart-card");
+  if(!card||card.closest("[hidden]"))return;
+  const viewportHeight=window.visualViewport?.height||window.innerHeight;
+  const top=card.getBoundingClientRect().top;
+  const available=Math.floor(viewportHeight-top-20);
+  card.style.setProperty("--entrada-evolucion-chart-height",`${Math.max(340,Math.min(520,available))}px`);
+}
+window.addEventListener("resize",()=>requestAnimationFrame(syncEntradaEvolucionChartHeight),{passive:true});
+window.visualViewport?.addEventListener("resize",()=>requestAnimationFrame(syncEntradaEvolucionChartHeight),{passive:true});
+let entradaEvolucionResizeFrame=0;
+let entradaEvolucionObservedWidth=0;
+function scheduleEntradaEvolucionResponsiveRender(){
+  cancelAnimationFrame(entradaEvolucionResizeFrame);
+  entradaEvolucionResizeFrame=requestAnimationFrame(()=>{
+    const view=$("#view-entrada-evolucion");
+    if(!view?.classList.contains("active")||!Array.isArray(db.entradaEvolucion)||!db.entradaEvolucion.length)return;
+    syncEntradaEvolucionChartHeight();
+    renderEntradaEvolucion();
+  });
+}
+function initializeEntradaEvolucionResizeObserver(){
+  const card=document.querySelector("#view-entrada-evolucion .entrada-evolucion-chart-card");
+  if(!card||!("ResizeObserver" in window))return;
+  new ResizeObserver(entries=>{
+    const width=Math.round(entries[0]?.contentRect?.width||0);
+    if(!width||Math.abs(width-entradaEvolucionObservedWidth)<2)return;
+    entradaEvolucionObservedWidth=width;
+    scheduleEntradaEvolucionResponsiveRender();
+  }).observe(card);
+}
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",initializeEntradaEvolucionResizeObserver,{once:true});
+}else{
+  initializeEntradaEvolucionResizeObserver();
+}
+function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
   const svg=$("#entradaEvolucionChart");
   if(!svg)return;
-  const width=1320,height=500,left=68,right=10,top=16,bottom=46;
+  const height=440;
+  const renderedRect=svg.getBoundingClientRect();
+  const renderedRatio=renderedRect.width>0&&renderedRect.height>0
+    ?renderedRect.width/renderedRect.height
+    :3;
+  const width=Math.max(1320,Math.round(height*renderedRatio));
+  const left=90,right=Math.max(60,Math.round(width*.10)-left),top=18,bottom=38;
   const chartWidth=width-left-right,chartHeight=height-top-bottom;
-  const allDates=[...new Set([...daily.map(([date])=>date),...compareDaily.map(([date])=>date)])].sort();
-  const firstMap=new Map(daily),compareMap=new Map(compareDaily);
-  const firstSeries=allDates.map(date=>[date,Number(firstMap.get(date)||0)]);
-  const secondSeries=allDates.map(date=>[date,Number(compareMap.get(date)||0)]);
+  const selectedMonthFrom=Math.max(0,Math.min(11,Number($("#entradaEvolucionMonthFrom")?.value??0)));
+  const selectedMonthTo=Math.max(selectedMonthFrom,Math.min(11,Number($("#entradaEvolucionMonthTo")?.value??11)));
+  const dateInsideSelectedPeriod=date=>{
+    const match=String(date||"").match(/^(\d{2})-(\d{2})$/);
+    if(!match)return false;
+    const month=Number(match[1])-1;
+    return month>=selectedMonthFrom&&month<=selectedMonthTo;
+  };
+  const visibleDaily=daily.filter(([date])=>dateInsideSelectedPeriod(date));
+  const visibleCompareDaily=compareDaily.filter(([date])=>dateInsideSelectedPeriod(date));
+  const allDates=[...new Set([...visibleDaily.map(([date])=>date),...visibleCompareDaily.map(([date])=>date)])].sort();
+  const firstMap=new Map(visibleDaily),compareMap=new Map(visibleCompareDaily);
+  const chartValue=value=>truckSimulation.showTrucks?trucksFromKg(value):Number(value||0);
+  let firstRunning=0,secondRunning=0;
+  const firstRawSeries=allDates.map(date=>{
+    const value=Number(firstMap.get(date)||0);
+    if(entradaEvolucionMode==="acumulada")firstRunning+=value;
+    return [date,chartValue(entradaEvolucionMode==="acumulada"?firstRunning:value)];
+  });
+  const secondRawSeries=allDates.map(date=>{
+    const value=Number(compareMap.get(date)||0);
+    if(entradaEvolucionMode==="acumulada")secondRunning+=value;
+    return [date,chartValue(entradaEvolucionMode==="acumulada"?secondRunning:value)];
+  });
+  const movingAverage=(series,windowSize=7)=>series.map(([date],index)=>{
+    const start=Math.max(0,index-windowSize+1);
+    const window=series.slice(start,index+1);
+    const average=window.reduce((sum,[,value])=>sum+Number(value||0),0)/Math.max(1,window.length);
+    return [date,average];
+  });
+  const isDailyTrend=entradaEvolucionMode!=="acumulada";
+  const firstSeries=isDailyTrend?movingAverage(firstRawSeries):firstRawSeries;
+  const secondSeries=isDailyTrend?movingAverage(secondRawSeries):secondRawSeries;
   const maxValue=Math.max(1,...firstSeries.map(([,value])=>value),...secondSeries.map(([,value])=>value));
-  const axisMax=Math.ceil(maxValue/1000000)*1000000||1;
-  const xAt=index=>left+(allDates.length<=1?chartWidth/2:index*chartWidth/(allDates.length-1));
+  const niceAxisMaximum=value=>{
+    if(!truckSimulation.showTrucks)return Math.ceil(value/1000000)*1000000||1;
+    const roughStep=Math.max(1,value/4);
+    const magnitude=10**Math.floor(Math.log10(roughStep));
+    const normalized=roughStep/magnitude;
+    const niceNormalized=normalized<=1?1:normalized<=2?2:normalized<=5?5:10;
+    const step=Math.max(1,niceNormalized*magnitude);
+    return Math.ceil(value/step)*step;
+  };
+  const axisMax=niceAxisMaximum(maxValue);
+  const dayOfYear=date=>{
+    const [month,day]=String(date).split("-").map(Number);
+    return Math.max(0,Math.min(365,Math.round((Date.UTC(2000,month-1,day)-Date.UTC(2000,0,1))/86400000)));
+  };
+  const monthLastDay=monthIndex=>new Date(2000,monthIndex+1,0).getDate();
+  const domainStartDate=`${String(selectedMonthFrom+1).padStart(2,"0")}-01`;
+  const domainEndDate=`${String(selectedMonthTo+1).padStart(2,"0")}-${String(monthLastDay(selectedMonthTo)).padStart(2,"0")}`;
+  const domainStart=dayOfYear(domainStartDate);
+  const domainEnd=dayOfYear(domainEndDate);
+  const domainSpan=Math.max(1,domainEnd-domainStart);
+  const xAtDate=date=>left+((dayOfYear(date)-domainStart)/domainSpan)*chartWidth;
+  const xAt=index=>xAtDate(allDates[index]);
   const yAt=value=>top+chartHeight-(Number(value||0)/axisMax)*chartHeight;
   const points=firstSeries.map(([,value],index)=>`${xAt(index)},${yAt(value)}`).join(" ");
   const comparePoints=compareEntradaEvolucionProject?secondSeries.map(([,value],index)=>`${xAt(index)},${yAt(value)}`).join(" "):"";
-  const area=firstSeries.length?`${left},${top+chartHeight} ${points} ${xAt(firstSeries.length-1)},${top+chartHeight}`:"";
+  const area=firstSeries.length?`${xAt(0)},${top+chartHeight} ${points} ${xAt(firstSeries.length-1)},${top+chartHeight}`:"";
+  const formatAxisValue=value=>{
+    if(truckSimulation.showTrucks)return formatTruckCount(value);
+    const tonnes=Number(value||0)/1000;
+    return new Intl.NumberFormat("es-PY",{maximumFractionDigits:0}).format(tonnes);
+  };
+  const formatChartValue=value=>truckSimulation.showTrucks
+    ?`${formatTruckCount(value)} camiones`
+    :`${formatAxisValue(value)} ton`;
+  const formatAxisLabel=value=>truckSimulation.showTrucks
+    ?`${formatTruckCount(value)} camiones`
+    :`${formatAxisValue(value)} ton`;
   const grid=[];
+  const axisVolumeLabels=[];
   for(let index=0;index<=4;index++){
     const y=top+index*chartHeight/4;
     const value=axisMax*(4-index)/4;
     grid.push(`<line class="entrada-evolucion-grid" x1="${left}" y1="${y}" x2="${width-right}" y2="${y}"/>`);
-    grid.push(`<text class="entrada-evolucion-axis-label entrada-evolucion-axis-volume" x="${left-10}" y="${y+4}" text-anchor="end">${esc(kg(value))}</text>`);
+    axisVolumeLabels.push(`<text class="entrada-evolucion-axis-label entrada-evolucion-axis-volume" x="${left+8}" y="${y+4}" text-anchor="start">${esc(formatAxisLabel(value))}</text>`);
   }
-  const labelStep=Math.max(1,Math.ceil(allDates.length/10));
-  const xLabels=allDates.map((date,index)=>{
-    if(index%labelStep!==0&&index!==allDates.length-1)return "";
-    const [month,day]=date.split("-");
-    return `<text class="entrada-evolucion-axis-label entrada-evolucion-axis-date" x="${xAt(index)}" y="${height-10}" text-anchor="middle">${day}/${month}</text>`;
+  const monthNames=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  const visibleMonths=monthNames
+    .map((name,index)=>({name,index}))
+    .filter(({index})=>index>=selectedMonthFrom&&index<=selectedMonthTo);
+  const monthDividers=visibleMonths.slice(1).map(({index})=>{
+    const month=String(index+1).padStart(2,"0");
+    const x=xAtDate(`${month}-01`);
+    return `<line class="entrada-evolucion-month-divider" x1="${x}" y1="${top}" x2="${x}" y2="${top+chartHeight}"/>`;
   }).join("");
-  const circles=firstSeries.filter(([,value])=>Number(value)!==0).map(([date,value])=>{
+  const xLabels=visibleMonths.map(({name,index})=>{
+    const month=String(index+1).padStart(2,"0");
+    const labelDay=Math.ceil(monthLastDay(index)/2);
+    return `<text class="entrada-evolucion-axis-label entrada-evolucion-axis-date" x="${xAtDate(`${month}-${String(labelDay).padStart(2,"0")}`)}" y="${height-10}" text-anchor="middle">${name}</text>`;
+  }).join("");
+  const now=new Date();
+  const todayMonthDay=`${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  const todayPosition=dayOfYear(todayMonthDay);
+  const todayLine=todayPosition>=domainStart&&todayPosition<=domainEnd
+    ?`<line class="entrada-evolucion-today-line" x1="${xAtDate(todayMonthDay)}" y1="${top}" x2="${xAtDate(todayMonthDay)}" y2="${top+chartHeight}"/>`
+    :"";
+  const circles=firstRawSeries.filter(([,value])=>Number(value)!==0).map(([date,value])=>{
     const index=allDates.indexOf(date);
+    const displayValue=Number(firstSeries[index]?.[1]||0);
     return (
-    `<circle class="entrada-evolucion-point" cx="${xAt(index)}" cy="${yAt(value)}" r="3.5" data-project="${esc(activeEntradaEvolucionProject)}" data-date="${date}" data-value="${Number(value)}"/>`
+    `<circle class="entrada-evolucion-point" cx="${xAt(index)}" cy="${yAt(displayValue)}" r="3.5" data-project="${esc(activeEntradaEvolucionProject)}" data-date="${date}" data-value="${Number(value)}"/>`
     );
   }).join("");
-  const compareCircles=compareEntradaEvolucionProject?secondSeries.filter(([,value])=>Number(value)!==0).map(([date,value])=>{
+  const compareCircles=compareEntradaEvolucionProject?secondRawSeries.filter(([,value])=>Number(value)!==0).map(([date,value])=>{
     const index=allDates.indexOf(date);
+    const displayValue=Number(secondSeries[index]?.[1]||0);
     return (
-    `<circle class="entrada-evolucion-point compare" cx="${xAt(index)}" cy="${yAt(value)}" r="3.5" data-project="${esc(compareEntradaEvolucionProject)}" data-date="${date}" data-value="${Number(value)}"/>`
+    `<circle class="entrada-evolucion-point compare" cx="${xAt(index)}" cy="${yAt(displayValue)}" r="3.5" data-project="${esc(compareEntradaEvolucionProject)}" data-date="${date}" data-value="${Number(value)}"/>`
     );
   }).join(""):"";
+  const endLabels=[];
+  const endGuides=[];
+  const firstAccumulatedTotal=chartValue(visibleDaily.reduce((sum,[,value])=>sum+Number(value||0),0));
+  const secondAccumulatedTotal=chartValue(visibleCompareDaily.reduce((sum,[,value])=>sum+Number(value||0),0));
+  const endLabelLayout=(className,date,value,total,targetY=yAt(value))=>{
+    const label=`${className==="primary"?activeEntradaEvolucionProject:compareEntradaEvolucionProject} — ${formatChartValue(total)}`;
+    const naturalX=xAtDate(date)+10;
+    const estimatedWidth=Math.max(120,label.length*7.1);
+    const wouldOverflow=naturalX+estimatedWidth>width-18;
+    const x=wouldOverflow?width-18:naturalX;
+    return {className,date,value,label,x,y:targetY,anchor:wouldOverflow?"end":"start"};
+  };
+  const labelMarkup=layout=>`<text class="entrada-evolucion-end-label ${layout.className}" x="${layout.x}" y="${layout.y}"${layout.anchor==="end"?' text-anchor="end"':""}>${esc(layout.label)}</text>`;
+  const guideMarkup=layout=>{
+    const pointX=xAtDate(layout.date);
+    const pointY=yAt(layout.value);
+    const labelEdgeX=layout.anchor==="end"
+      ?Math.max(pointX+8,layout.x-Math.max(120,layout.label.length*7.1)-6)
+      :layout.x-6;
+    return `<path class="entrada-evolucion-end-guide ${layout.className}" d="M ${pointX+3} ${pointY} L ${pointX+10} ${pointY} L ${labelEdgeX} ${layout.y}"/>`;
+  };
+  const layouts=[];
+  if(firstSeries.length){
+    const [date,value]=firstSeries[firstSeries.length-1];
+    layouts.push(endLabelLayout("primary",date,value,firstAccumulatedTotal,yAt(value)-7));
+  }
+  if(compareEntradaEvolucionProject&&secondSeries.length){
+    const [date,value]=secondSeries[secondSeries.length-1];
+    const closeToFirst=firstSeries.length&&Math.abs(yAt(value)-yAt(firstSeries[firstSeries.length-1][1]))<24;
+    layouts.push(endLabelLayout("compare",date,value,secondAccumulatedTotal,yAt(value)+(closeToFirst?12:-7)));
+  }
+  if(entradaEvolucionMode==="acumulada"){
+    layouts.forEach(layout=>endLabels.push(labelMarkup(layout)));
+  }
   svg.setAttribute("viewBox",`0 0 ${width} ${height}`);
-  svg.innerHTML=`<defs><linearGradient id="entradaEvolucionGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0093ab" stop-opacity=".22"/><stop offset="100%" stop-color="#0093ab" stop-opacity="0"/></linearGradient></defs>
-    ${grid.join("")}${area?`<polygon class="entrada-evolucion-area" points="${area}"/>`:""}
-    ${points?`<polyline class="entrada-evolucion-line" points="${points}"/>`:""}
-    ${comparePoints?`<polyline class="entrada-evolucion-line compare" points="${comparePoints}"/>`:""}
-    ${circles}${compareCircles}${xLabels}`;
+  svg.innerHTML=`<defs>
+    <linearGradient id="entradaEvolucionGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0093ab" stop-opacity=".07"/><stop offset="100%" stop-color="#0093ab" stop-opacity="0"/></linearGradient>
+    <filter id="entradaEvolucionBlueGlow" x="-20%" y="-30%" width="140%" height="160%" color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#0093ab" flood-opacity=".34"/></filter>
+    <filter id="entradaEvolucionOrangeGlow" x="-20%" y="-30%" width="140%" height="160%" color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#f59e0b" flood-opacity=".34"/></filter>
+    <clipPath id="entradaEvolucionPlotClip"><rect x="${left}" y="${top}" width="${chartWidth}" height="${chartHeight}"/></clipPath>
+  </defs>
+    ${grid.join("")}${monthDividers}${todayLine}
+    <g clip-path="url(#entradaEvolucionPlotClip)">
+      ${area?`<polygon class="entrada-evolucion-area" points="${area}"/>`:""}
+      ${points?`<polyline class="entrada-evolucion-line" points="${points}"/>`:""}
+      ${comparePoints?`<polyline class="entrada-evolucion-line compare" points="${comparePoints}"/>`:""}
+      ${circles}${compareCircles}
+    </g>
+    ${axisVolumeLabels.join("")}${xLabels}${endGuides.join("")}${endLabels.join("")}`;
   const tooltip=$("#entradaEvolucionTooltip");
   svg.querySelectorAll(".entrada-evolucion-point").forEach(point=>{
     point.addEventListener("mouseenter",()=>{
       if(!tooltip)return;
       const rect=svg.getBoundingClientRect();
       const [month,day]=point.dataset.date.split("-");
-      tooltip.innerHTML=`<strong>${esc(point.dataset.project)}</strong><br>${day}/${month}<br>${kg(point.dataset.value)} kg`;
-      tooltip.style.left=`${(Number(point.getAttribute("cx"))/width)*rect.width}px`;
-      tooltip.style.top=`${(Number(point.getAttribute("cy"))/height)*rect.height}px`;
+      const firstValue=Number(firstRawSeries.find(([date])=>date===point.dataset.date)?.[1]||0);
+      const secondValue=Number(secondRawSeries.find(([date])=>date===point.dataset.date)?.[1]||0);
+      const year=String(point.dataset.project||"").match(/\b(20\d{2})\b/)?.[1];
+      const fullDate=`${day}/${month}${year?`/${year}`:""}`;
+      const valueLabel=entradaEvolucionMode==="acumulada"?"Valor acumulado":"Valor diario";
+      const tooltipValue=value=>truckSimulation.showTrucks?`${formatTruckCount(value)} camiones`:`${kg(value)} kg`;
+      const difference=compareEntradaEvolucionProject&&firstValue&&secondValue
+        ?`<br><span>Diferencia: <strong>${esc(new Intl.NumberFormat("es-PY",{maximumFractionDigits:1,signDisplay:"always"}).format(((firstValue-secondValue)/secondValue)*100))}%</strong></span>`
+        :"";
+      tooltip.innerHTML=`<strong>${fullDate}</strong><br>${esc(activeEntradaEvolucionProject)} · ${valueLabel}: <strong>${tooltipValue(firstValue)}</strong>${compareEntradaEvolucionProject?`<br>${esc(compareEntradaEvolucionProject)} · ${valueLabel}: <strong>${tooltipValue(secondValue)}</strong>`:""}${difference}`;
       tooltip.hidden=false;
+      const wrap=tooltip.parentElement;
+      const wrapRect=wrap.getBoundingClientRect();
+      const pointX=(Number(point.getAttribute("cx"))/width)*rect.width+(rect.left-wrapRect.left);
+      const pointY=(Number(point.getAttribute("cy"))/height)*rect.height+(rect.top-wrapRect.top);
+      const tooltipRect=tooltip.getBoundingClientRect();
+      const halfWidth=tooltipRect.width/2;
+      const safeLeft=Math.max(halfWidth+8,Math.min(wrapRect.width-halfWidth-8,pointX));
+      const showBelow=pointY-tooltipRect.height-12<0;
+      tooltip.style.left=`${safeLeft}px`;
+      tooltip.style.top=`${pointY}px`;
+      tooltip.style.transform=showBelow?"translate(-50%, 12px)":"translate(-50%, calc(-100% - 12px))";
     });
     point.addEventListener("mouseleave",()=>{if(tooltip)tooltip.hidden=true});
   });
@@ -16825,10 +17611,37 @@ function renderEntradaEvolucionChart(daily,compareDaily=[]){
 async function processEntradaEvolucionImport(file){
   const parsed=await parseEntradaEvolucionFile(file);
   db.entradaEvolucion=parsed.records;
-  activeEntradaEvolucionProject=entradaEvolucionProjects()[0]||"";
+  activeEntradaEvolucionProject="";
+  compareEntradaEvolucionProject="";
+  entradaEvolucionFiltersRestored=false;
+  restoreEntradaEvolucionFilters(entradaEvolucionProjects());
+  if(activeEntradaEvolucionProject)syncEntradaEvolucionPeriodToSelectedProjects();
   saveDB();
+  try{await persistEntradaEvolucionImportFile(file)}catch(error){
+    console.warn("Los datos fueron importados, pero el archivo no pudo guardarse en el navegador.",error);
+  }
   renderEntradaEvolucion();
   return parsed;
+}
+function clearEntradaEvolucionImportedRecords(){
+  const total=Array.isArray(db.entradaEvolucion)?db.entradaEvolucion.length:0;
+  if(!total){
+    toast("No hay datos importados para limpiar.");
+    return;
+  }
+  if(!window.confirm(`¿Está seguro de que desea eliminar ${total} registros importados de Entrada? Esta acción no se puede deshacer.`))return;
+  db.entradaEvolucion=[];
+  activeEntradaEvolucionProject="";
+  compareEntradaEvolucionProject="";
+  selectedEntradaEvolucionSilos.clear();
+  const from=$("#entradaEvolucionDateFrom");
+  const to=$("#entradaEvolucionDateTo");
+  if(from)from.value="";
+  if(to)to.value="";
+  saveDB();
+  void clearPersistedEntradaEvolucionImportFile();
+  renderEntradaEvolucion();
+  toast("Datos importados de Entrada eliminados.");
 }
 function saveEntradaEvolucionInDatos(){
   const records=Array.isArray(db.entradaEvolucion)?db.entradaEvolucion:[];
@@ -16948,6 +17761,15 @@ function openEntradaImportFilters(){
       compareSelect.value=projects.includes(previousCompare)&&previousCompare!==project?previousCompare:"";
     }
     const chosenProjects=new Set([project,String(compareSelect?.value||"")].filter(Boolean));
+    const chosenDates=(db.entradaEvolucion||[])
+      .filter(item=>chosenProjects.has(String(item.project||"")))
+      .map(item=>String(item.date||""))
+      .filter(date=>/^\d{4}-\d{2}-\d{2}$/.test(date))
+      .sort();
+    const dateFrom=$("#entradaImportFilterDateFrom");
+    const dateTo=$("#entradaImportFilterDateTo");
+    if(dateFrom)dateFrom.value=chosenDates[0]||"";
+    if(dateTo)dateTo.value=chosenDates[chosenDates.length-1]||"";
     const silos=[...new Set((db.entradaEvolucion||[])
       .filter(item=>chosenProjects.has(String(item.project||"")))
       .map(item=>String(item.silo||"").trim()).filter(Boolean))]
@@ -16959,11 +17781,6 @@ function openEntradaImportFilters(){
   projectSelect.onchange=refreshCompareAndSilos;
   compareSelect.onchange=refreshCompareAndSilos;
   refreshCompareAndSilos();
-  const dates=(db.entradaEvolucion||[]).map(item=>String(item.date||"")).filter(Boolean).sort();
-  const dateFrom=$("#entradaImportFilterDateFrom");
-  const dateTo=$("#entradaImportFilterDateTo");
-  if(dateFrom)dateFrom.value=dates[0]||"";
-  if(dateTo)dateTo.value=dates[dates.length-1]||"";
   const filterStep=$("#entradaImportFilterStep");
   const resultActions=$("#entradaImportProgressOverlay .embarques2-import-result-actions");
   if(resultActions)resultActions.hidden=true;
@@ -18057,7 +18874,25 @@ function hideLogin(){
   document.body.classList.remove("auth-locked");
   $("#loginScreen")?.classList.add("is-hidden");
 }
-function performLogin(){
+let loginInProgress=false;
+function setLoginLoading(loading){
+  const button=$("#loginSubmit");
+  const userSelect=$("#loginUser");
+  const passwordField=$("#loginPassword");
+  const passwordToggle=$("#toggleLoginPassword");
+  loginInProgress=loading;
+  if(button){
+    button.disabled=loading;
+    button.classList.toggle("is-loading",loading);
+    button.textContent=loading?"Entrando...":"Ingresar";
+    button.setAttribute("aria-busy",String(loading));
+  }
+  if(userSelect)userSelect.disabled=loading;
+  if(passwordField)passwordField.disabled=loading;
+  if(passwordToggle)passwordToggle.disabled=loading;
+}
+async function performLogin(){
+  if(loginInProgress)return;
   const user=byId(db.users,$("#loginUser")?.value);
   const password=$("#loginPassword")?.value||"";
   const error=$("#loginError");
@@ -18069,12 +18904,26 @@ function performLogin(){
     if(error)error.textContent="Contraseña incorrecta.";
     return;
   }
-  authSession={authenticatedUserId:user.id,contextUserId:user.id};
-  saveAuthSession();
-  hideLogin();
-  renderAll();
-  openCurrentProfileDefaultMenu();
-  toast(`Bienvenido, ${user.name}.`);
+  setLoginLoading(true);
+  if(error)error.textContent="";
+  const loadingStartedAt=performance.now();
+  try{
+    /* Entrega dois quadros ao navegador para que o spinner apareça antes
+       da restauração dos dados e mantém o retorno visual perceptível. */
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    await restoreLastEntradaEvolucionImport();
+    authSession={authenticatedUserId:user.id,contextUserId:user.id};
+    saveAuthSession();
+    const minimumLoadingTime=450;
+    const remainingTime=minimumLoadingTime-(performance.now()-loadingStartedAt);
+    if(remainingTime>0)await new Promise(resolve=>setTimeout(resolve,remainingTime));
+    hideLogin();
+    renderAll();
+    openCurrentProfileDefaultMenu();
+    toast(`Bienvenido, ${user.name}.`);
+  }finally{
+    setLoginLoading(false);
+  }
 }
 function logout(){
   closeTopUserMenu();
@@ -18866,34 +19715,52 @@ function entradaEvolucionShareCanvas(){
   ctx.restore();
   ctx.fillStyle="#003d22";
   ctx.font='700 42px Inter, "Segoe UI", Arial, sans-serif';
-  ctx.fillText("Evolución de Entrada",120,150);
-  ctx.fillStyle="#6c7d75";
-  ctx.font='400 24px Inter, "Segoe UI", Arial, sans-serif';
-  ctx.fillText($("#entradaEvolucionChartSubtitle")?.textContent||"Volumen diario en kg",120,194);
-  const projects=[activeEntradaEvolucionProject,compareEntradaEvolucionProject].filter(Boolean);
-  let legendX=120;
-  projects.forEach((project,index)=>{
-    ctx.beginPath();
-    ctx.arc(legendX+8,238,8,0,Math.PI*2);
-    ctx.fillStyle=index===0?"#0093ab":"#e78b35";
-    ctx.fill();
-    ctx.fillStyle="#183128";
-    ctx.font='600 22px Inter, "Segoe UI", Arial, sans-serif';
-    ctx.fillText(project,legendX+28,246);
-    legendX+=Math.min(660,ctx.measureText(project).width+82);
-  });
+  ctx.fillText(entradaEvolucionMode==="acumulada"?"Evolución acumulada diaria":"Evolución de entrada diaria",120,150);
+  let chartTop=205;
+  let chartHeight=915;
+  if(entradaEvolucionMode!=="acumulada"){
+    const legendItems=[
+      {name:activeEntradaEvolucionProject,color:"#0093ab",dashed:false},
+      ...(compareEntradaEvolucionProject?[{name:compareEntradaEvolucionProject,color:"#f59e0b",dashed:true}]:[])
+    ];
+    ctx.font='700 20px Inter, "Segoe UI", Arial, sans-serif';
+    const legendWidth=legendItems.reduce((width,item,index)=>{
+      const itemWidth=54+ctx.measureText(item.name).width;
+      return width+itemWidth+(index?42:0);
+    },0);
+    let legendX=card.x+card.w-50-legendWidth;
+    ctx.textAlign="left";
+    legendItems.forEach(item=>{
+      ctx.save();
+      ctx.strokeStyle=item.color;
+      ctx.lineWidth=4;
+      ctx.setLineDash(item.dashed?[10,7]:[]);
+      ctx.beginPath();
+      ctx.moveTo(legendX,154);
+      ctx.lineTo(legendX+42,154);
+      ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle="#53686d";
+      ctx.fillText(item.name,legendX+54,161);
+      legendX+=54+ctx.measureText(item.name).width+42;
+    });
+  }
   const clone=source.cloneNode(true);
   clone.setAttribute("xmlns","http://www.w3.org/2000/svg");
   clone.setAttribute("width","2640");
   clone.setAttribute("height","850");
   clone.insertAdjacentHTML("afterbegin",`<style>
     .entrada-evolucion-grid{stroke:#dfe7e3;stroke-width:1}
-    .entrada-evolucion-axis-label{fill:#5f7269;font:400 12px Inter,Segoe UI,Arial,sans-serif}
+    .entrada-evolucion-month-divider{stroke:#dfe7e3;stroke-width:1;opacity:.72}
+    .entrada-evolucion-today-line{stroke:#71827b;stroke-width:1.25;stroke-dasharray:4 5;opacity:.52}
+    .entrada-evolucion-axis-label{fill:#5f7269;font:400 14.4px Inter,Segoe UI,Arial,sans-serif}
     .entrada-evolucion-area{fill:url(#entradaEvolucionGradient)}
-    .entrada-evolucion-line{fill:none;stroke:#0093ab;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-    .entrada-evolucion-line.compare{stroke:#e78b35}
-    .entrada-evolucion-point{fill:#fff;stroke:#0093ab;stroke-width:3}
-    .entrada-evolucion-point.compare{stroke:#e78b35}
+    .entrada-evolucion-line{fill:none;stroke:#0093ab;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;filter:url(#entradaEvolucionBlueGlow)}
+    .entrada-evolucion-line.compare{stroke:#f59e0b;stroke-dasharray:9 6;filter:url(#entradaEvolucionOrangeGlow)}
+    .entrada-evolucion-point{opacity:0}
+    .entrada-evolucion-end-label{font:700 14.4px Inter,Segoe UI,Arial,sans-serif;dominant-baseline:middle}
+    .entrada-evolucion-end-label.primary{fill:#007f93}
+    .entrada-evolucion-end-label.compare{fill:#d98208}
   </style>`);
   const svgText=new XMLSerializer().serializeToString(clone);
   const svgBlob=new Blob([svgText],{type:"image/svg+xml;charset=utf-8"});
@@ -18901,7 +19768,7 @@ function entradaEvolucionShareCanvas(){
   return new Promise((resolve,reject)=>{
     const image=new Image();
     image.onload=()=>{
-      ctx.drawImage(image,90,270,2620,850);
+      ctx.drawImage(image,90,chartTop,2620,chartHeight);
       URL.revokeObjectURL(url);
       ctx.fillStyle="#6c7d75";
       ctx.font='400 18px Inter, "Segoe UI", Arial, sans-serif';
@@ -18927,7 +19794,7 @@ async function shareEntradaEvolucionImage(){
     const canvas=await entradaEvolucionShareCanvas();
     const blob=await canvasToPngBlob(canvas);
     const safeProject=String(activeEntradaEvolucionProject||"proyecto").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/gi,"_").replace(/^_|_$/g,"");
-    const fileName=`evolucion_entrada_${safeProject||"proyecto"}.png`;
+    const fileName=`evolucion_${entradaEvolucionMode}_entrada_${safeProject||"proyecto"}.png`;
     const file=typeof File==="function"?new File([blob],fileName,{type:"image/png"}):null;
     let shared=false;
     if(file&&navigator.share&&navigator.canShare){
@@ -19452,8 +20319,11 @@ function updateSidebarToggleState(){
   button.setAttribute("aria-expanded",String(!collapsed));
 }
 function initializeSidebarPreference(){
-  let collapsed=false;
-  try{collapsed=localStorage.getItem(SIDEBAR_PREF_KEY)==="1"}catch(e){}
+  let collapsed=true;
+  try{
+    const savedPreference=localStorage.getItem(SIDEBAR_PREF_KEY);
+    collapsed=savedPreference===null||savedPreference==="1";
+  }catch(e){}
   document.body.classList.toggle("sidebar-collapsed",collapsed&&desktopSidebarMode());
   updateSidebarToggleState();
 }
@@ -19505,7 +20375,6 @@ function showView(view,skipAccessCheck=false){
   if(actualView==="embarques2-nacional")renderEmbarques2Table("nacional");
   if(actualView==="embarques2-exportacion")renderEmbarques2Table("exportacion");
   if(actualView==="plan-exportacion")renderExportacionShipmentPlan();
-  if(actualView==="entrada-evolucion")renderEntradaEvolucion();
   if(actualView==="national"){renderNationalSummary();renderNationalSiloTable();}
   if(actualView==="stock")renderStockSiloTable();
   if(actualView==="movements")renderStockMovements();
@@ -19517,6 +20386,16 @@ function showView(view,skipAccessCheck=false){
   $$(".view").forEach(v=>v.classList.toggle("active",v.id===`view-${actualView}`));
   setSidebarActive({view});
   closeSidebarMobile();
+  if(actualView==="entrada-evolucion"){
+    requestAnimationFrame(()=>{
+      syncEntradaEvolucionChartHeight();
+      renderEntradaEvolucion();
+      requestAnimationFrame(()=>{
+        syncEntradaEvolucionChartHeight();
+        renderEntradaEvolucion();
+      });
+    });
+  }
 }
 
 function showRegistry(type,skipAccessCheck=false){
@@ -20967,7 +21846,15 @@ $("#toggleLoginPassword").addEventListener("click",()=>{
 });
 $("#logoutButton").addEventListener("click",logout);
 $("#profileButton").addEventListener("click",()=>{closeTopUserMenu();ownProfileModal()});
-$("#topUserTrigger").addEventListener("click",event=>{event.stopPropagation();toggleTopUserMenu()});
+$("#topUserTrigger").addEventListener("click",event=>{
+  event.stopPropagation();
+  if(desktopSidebarMode()&&document.body.classList.contains("sidebar-collapsed")){
+    closeTopUserMenu();
+    ownProfileModal();
+    return;
+  }
+  toggleTopUserMenu();
+});
 $("#saveHierarchy").addEventListener("click",saveHierarchy);
 
 $("#sidebarToggle").onclick=toggleSidebar;
@@ -20977,8 +21864,11 @@ document.addEventListener("keydown",event=>{if(event.key==="Escape")closeTopUser
 window.addEventListener("resize",()=>{
   if(desktopSidebarMode()){
     document.body.classList.remove("sidebar-mobile-open");
-    let collapsed=false;
-    try{collapsed=localStorage.getItem(SIDEBAR_PREF_KEY)==="1"}catch(e){}
+    let collapsed=true;
+    try{
+      const savedPreference=localStorage.getItem(SIDEBAR_PREF_KEY);
+      collapsed=savedPreference===null||savedPreference==="1";
+    }catch(e){}
     document.body.classList.toggle("sidebar-collapsed",collapsed);
   }else{
     document.body.classList.remove("sidebar-collapsed");
@@ -21008,6 +21898,7 @@ function bindTruckCapacityInput(id){
       renderAnalysisExport();
       renderAnalysisNational();
       renderExportacionShipmentPlan();
+      if(id==="truckCapacityKgEntradaEvolucion"||truckSimulation.showTrucks)renderEntradaEvolucion();
     }
   });
   input.addEventListener("blur",event=>{
@@ -21020,11 +21911,12 @@ function bindTruckCapacityInput(id){
     }
   });
 }
-["truckCapacityKg","truckCapacityKgExport","truckCapacityKgNational","truckCapacityKgEmbarques2","truckCapacityKgEmbarques2Nacional","truckCapacityKgEmbarques2Exportacion","truckCapacityKgPlanExportacion"].forEach(bindTruckCapacityInput);
+["truckCapacityKg","truckCapacityKgExport","truckCapacityKgNational","truckCapacityKgEmbarques2","truckCapacityKgEmbarques2Nacional","truckCapacityKgEmbarques2Exportacion","truckCapacityKgPlanExportacion","truckCapacityKgEntradaEvolucion"].forEach(bindTruckCapacityInput);
 $("#toggleTruckViewEmbarques2")?.addEventListener("click",toggleTruckView);
 $("#toggleTruckViewEmbarques2Nacional")?.addEventListener("click",toggleTruckView);
 $("#toggleTruckViewEmbarques2Exportacion")?.addEventListener("click",toggleTruckView);
 $("#toggleTruckViewPlanExportacion")?.addEventListener("click",toggleTruckView);
+$("#toggleTruckViewEntradaEvolucion")?.addEventListener("click",toggleTruckView);
 
 
 function shiftAnalysisDate(fieldId,days,render){
@@ -21057,6 +21949,55 @@ function shiftAnalysisDate(fieldId,days,render){
 $("#shareExportAnalysis")?.addEventListener("click",shareExportAnalysisImage);
 $("#shareNationalAnalysis")?.addEventListener("click",shareNationalAnalysisImage);
 $("#shareEntradaEvolucion")?.addEventListener("click",shareEntradaEvolucionImage);
+async function toggleEntradaEvolucionFullscreen(){
+  const panel=$("#entradaEvolucionVisualPanel");
+  if(!panel)return;
+  try{
+    if(document.fullscreenElement===panel){
+      await document.exitFullscreen();
+    }else{
+      const capacityInput=$("#truckCapacityKgEntradaEvolucion");
+      const capacity=parseKgInput(capacityInput?.value);
+      if(capacity>0){
+        truckSimulation.capacityKg=capacity;
+        saveTruckSimulation();
+      }
+      await panel.requestFullscreen();
+    }
+  }catch(error){
+    toast("No fue posible abrir el gráfico en pantalla completa.");
+  }
+}
+function syncEntradaEvolucionFullscreenState(){
+  const panel=$("#entradaEvolucionVisualPanel");
+  const button=$("#fullscreenEntradaEvolucion");
+  const active=document.fullscreenElement===panel;
+  if(button){
+    button.setAttribute("aria-pressed",String(active));
+    button.title=active?"Salir de pantalla completa":"Ver gráfico en pantalla completa";
+    button.setAttribute("aria-label",button.title);
+    const expand=button.querySelector(".fullscreen-expand-icon");
+    const collapse=button.querySelector(".fullscreen-collapse-icon");
+    if(expand)expand.hidden=active;
+    if(collapse)collapse.hidden=!active;
+  }
+  requestAnimationFrame(()=>{
+    syncEntradaEvolucionChartHeight();
+    renderEntradaEvolucion();
+  });
+}
+$("#fullscreenEntradaEvolucion")?.addEventListener("click",toggleEntradaEvolucionFullscreen);
+document.addEventListener("fullscreenchange",syncEntradaEvolucionFullscreenState);
+$("#entradaEvolucionModeToggle")?.addEventListener("click",event=>{
+  const button=event.target.closest("[data-entrada-evolucion-mode]");
+  if(!button)return;
+  const nextMode=button.dataset.entradaEvolucionMode;
+  if(nextMode===entradaEvolucionMode)return;
+  entradaEvolucionMode=nextMode;
+  saveEntradaEvolucionFilters();
+  renderEntradaEvolucion();
+});
+$("#clearEntradaEvolucionImportedData")?.addEventListener("click",clearEntradaEvolucionImportedRecords);
 
 initAllEmbarques2DateRanges();
 initNationalDateRange();
@@ -21273,23 +22214,90 @@ $("#entradaImportFilterApply")?.addEventListener("click",()=>{
   const dateTo=$("#entradaEvolucionDateTo");
   if(dateFrom)dateFrom.value=String($("#entradaImportFilterDateFrom")?.value||"");
   if(dateTo)dateTo.value=String($("#entradaImportFilterDateTo")?.value||"");
+  saveEntradaEvolucionFilters();
   closeEntradaImportProgress();
   showView("entrada-evolucion");
   renderEntradaEvolucion();
+  requestAnimationFrame(()=>requestAnimationFrame(scheduleEntradaEvolucionResponsiveRender));
 });
 $("#entradaEvolucionProject")?.addEventListener("change",event=>{
   activeEntradaEvolucionProject=String(event.target.value||"");
+  if(compareEntradaEvolucionProject===activeEntradaEvolucionProject)compareEntradaEvolucionProject="";
   selectedEntradaEvolucionSilos.clear();
+  if(activeEntradaEvolucionProject)syncEntradaEvolucionPeriodToSelectedProjects();
+  saveEntradaEvolucionFilters();
   renderEntradaEvolucion();
 });
 $("#entradaEvolucionCompareProject")?.addEventListener("change",event=>{
   compareEntradaEvolucionProject=String(event.target.value||"");
   selectedEntradaEvolucionSilos.clear();
+  if(activeEntradaEvolucionProject)syncEntradaEvolucionPeriodToSelectedProjects();
+  saveEntradaEvolucionFilters();
   renderEntradaEvolucion();
 });
 ["entradaEvolucionDateFrom","entradaEvolucionDateTo"].forEach(id=>{
   $(`#${id}`)?.addEventListener("change",renderEntradaEvolucion);
+  $(`#${id}`)?.addEventListener("input",renderEntradaEvolucion);
 });
+let entradaEvolucionPeriodRenderFrame=0;
+function queueEntradaEvolucionPeriodRender(){
+  cancelAnimationFrame(entradaEvolucionPeriodRenderFrame);
+  entradaEvolucionPeriodRenderFrame=requestAnimationFrame(()=>{
+    syncEntradaEvolucionPeriodSlider();
+    saveEntradaEvolucionFilters();
+    renderEntradaEvolucion();
+  });
+}
+["entradaEvolucionMonthFrom","entradaEvolucionMonthTo"].forEach(id=>{
+  $(`#${id}`)?.addEventListener("input",queueEntradaEvolucionPeriodRender);
+});
+(()=>{
+  const track=document.querySelector(".entrada-evolucion-period-track");
+  const fromRange=$("#entradaEvolucionMonthFrom");
+  const toRange=$("#entradaEvolucionMonthTo");
+  if(!track||!fromRange||!toRange)return;
+  let draggedRange=null;
+  const valueFromPointer=event=>{
+    const rect=track.getBoundingClientRect();
+    const ratio=Math.max(0,Math.min(1,(event.clientX-rect.left)/Math.max(1,rect.width)));
+    const min=Number(fromRange.min)||0;
+    const max=Number(fromRange.max)||11;
+    return Math.round(min+ratio*(max-min));
+  };
+  const updateDraggedRange=event=>{
+    if(!draggedRange)return;
+    const value=valueFromPointer(event);
+    if(draggedRange===fromRange)draggedRange.value=String(Math.min(value,Number(toRange.value)));
+    else draggedRange.value=String(Math.max(value,Number(fromRange.value)));
+    queueEntradaEvolucionPeriodRender();
+  };
+  track.addEventListener("pointerdown",event=>{
+    if(event.button!==undefined&&event.button!==0)return;
+    const value=valueFromPointer(event);
+    const fromDistance=Math.abs(value-Number(fromRange.value));
+    const toDistance=Math.abs(value-Number(toRange.value));
+    draggedRange=fromDistance<=toDistance?fromRange:toRange;
+    track.classList.add("is-dragging");
+    document.body.style.userSelect="none";
+    track.setPointerCapture?.(event.pointerId);
+    updateDraggedRange(event);
+    event.preventDefault();
+  });
+  track.addEventListener("pointermove",event=>{
+    if(!draggedRange)return;
+    updateDraggedRange(event);
+    event.preventDefault();
+  });
+  const stopDragging=event=>{
+    if(!draggedRange)return;
+    draggedRange=null;
+    track.classList.remove("is-dragging");
+    document.body.style.userSelect="";
+    if(track.hasPointerCapture?.(event.pointerId))track.releasePointerCapture(event.pointerId);
+  };
+  track.addEventListener("pointerup",stopDragging);
+  track.addEventListener("pointercancel",stopDragging);
+})();
 $("#entradaEvolucionSiloToggle")?.addEventListener("click",event=>{
   const panel=$("#entradaEvolucionSiloPanel");
   if(!panel)return;
@@ -21301,10 +22309,12 @@ $("#entradaEvolucionSiloSearch")?.addEventListener("input",renderEntradaEvolucio
 $("#entradaEvolucionSiloSelectVisible")?.addEventListener("click",()=>{
   entradaSiloVisibleNames(entradaEvolucionAvailableSilos(),"entradaEvolucionSiloSearch")
     .forEach(name=>selectedEntradaEvolucionSilos.add(name));
+  saveEntradaEvolucionFilters();
   renderEntradaEvolucion();
 });
 $("#entradaEvolucionSiloClear")?.addEventListener("click",()=>{
   selectedEntradaEvolucionSilos.clear();
+  saveEntradaEvolucionFilters();
   renderEntradaEvolucion();
 });
 $("#entradaEvolucionSiloOptions")?.addEventListener("change",event=>{
@@ -21312,6 +22322,7 @@ $("#entradaEvolucionSiloOptions")?.addEventListener("change",event=>{
   if(!checkbox)return;
   if(checkbox.checked)selectedEntradaEvolucionSilos.add(checkbox.value);
   else selectedEntradaEvolucionSilos.delete(checkbox.value);
+  saveEntradaEvolucionFilters();
   renderEntradaEvolucion();
 });
 $("#entradaImportFilterSiloToggle")?.addEventListener("click",event=>{
@@ -21523,18 +22534,48 @@ $("#modalOverlay").addEventListener("pointerup",event=>{
   if(shouldClose)closeModal();
 });
 $("#modalOverlay").addEventListener("pointercancel",()=>{modalBackdropPointerStarted=false});
-function initializeApplication(){
-  initializeSidebarPreference();
-  if(ensureContextAllowed()){
-    hideLogin();
-    renderAll();
-    openCurrentProfileDefaultMenu();
-  }else{
-    showLogin();
+async function initializeApplication(){
+  const restoringAtOpen=document.body.classList.contains("boot-restoring");
+  const loadingStartedAt=performance.now();
+  try{
+    initializeSidebarPreference();
+    if(ensureContextAllowed()){
+      await restoreLastEntradaEvolucionImport();
+      hideLogin();
+      renderAll();
+      openCurrentProfileDefaultMenu();
+    }else{
+      showLogin();
+    }
+    if(restoringAtOpen){
+      const minimumVisibleTime=420;
+      const remainingTime=minimumVisibleTime-(performance.now()-loadingStartedAt);
+      if(remainingTime>0)await new Promise(resolve=>setTimeout(resolve,remainingTime));
+    }
+  }finally{
+    document.body.classList.remove("boot-restoring");
+    const loadingScreen=$("#initialLoadingScreen");
+    if(loadingScreen)loadingScreen.setAttribute("aria-hidden","true");
   }
 }
 
-initializeApplication();
+async function restoreLastEntradaEvolucionImport(){
+  if(Array.isArray(db.entradaEvolucion)&&db.entradaEvolucion.length)return;
+  try{
+    const file=await readPersistedEntradaEvolucionImportFile();
+    if(!file)return;
+    const parsed=await parseEntradaEvolucionFile(file);
+    db.entradaEvolucion=parsed.records;
+    activeEntradaEvolucionProject="";
+    compareEntradaEvolucionProject="";
+    entradaEvolucionFiltersRestored=false;
+    restoreEntradaEvolucionFilters(entradaEvolucionProjects());
+    saveDB();
+  }catch(error){
+    console.warn("No se pudo restaurar automáticamente el último archivo de Entrada.",error);
+  }
+}
+void initializeApplication();
 </script>
 <div class="column-menu-popover is-hidden" id="columnMenuPopover">
   <div class="column-menu-head">Columnas</div>
@@ -21626,6 +22667,23 @@ initializeApplication();
   :is(#view-embarques2,#view-embarques2-nacional,#view-embarques2-exportacion)
   .embarques2-table thead .header-row :is(.embarques2-sort-button,.embarques2-sort-indicator){
     color:#fff !important;
+  }
+</style>
+
+<style id="main-content-20px-spacing">
+  /* Área central: mantém 20 px entre o conteúdo e todos os limites úteis. */
+  .main{
+    max-width:none !important;
+    margin-right:0 !important;
+    padding:20px !important;
+    box-sizing:border-box;
+  }
+
+  /* Evolución já recebe o espaçamento pela área central; evita margem dupla. */
+  #view-entrada-evolucion .entrada-evolucion-content{
+    width:100% !important;
+    margin-left:0 !important;
+    margin-right:0 !important;
   }
 </style>
 
