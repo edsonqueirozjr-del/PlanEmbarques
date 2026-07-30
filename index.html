@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- v23: zoom de 4 meses automático en diaria y acumulada; período eliminado del filtro de importación -->
+  <!-- v26: botón de tabla antes del control de línea fina/gruesa -->
 <title>Plan de Embarques</title>
   <style>
     :root{
@@ -9739,7 +9739,11 @@
   }
 
   .entrada-evolucion-content{
-    display:grid;gap:18px;width:90%;margin-left:auto;margin-right:auto
+    display:grid;gap:18px;width:90%;max-width:100%;min-width:0;margin-left:auto;margin-right:auto;box-sizing:border-box
+  }
+  #view-entrada-evolucion,
+  #view-entrada-evolucion .entrada-evolucion-visual-panel{
+    max-width:100%;min-width:0;
   }
   .entrada-evolucion-content[hidden]{display:none}
   .entrada-evolucion-toolbar{
@@ -9981,46 +9985,47 @@
   }
   .entrada-summary-difference.is-positive b{background:#e9f7ef;color:#17834b}
   .entrada-summary-difference.is-negative b{background:#fff0f0;color:#c53b3b}
+  .entrada-evolucion-split-layout{
+    position:relative;display:flex;align-items:stretch;width:100%;max-width:100%;min-width:0;height:var(--entrada-evolucion-chart-height,520px);min-height:0;
+    box-sizing:border-box;overflow:hidden;
+    --entrada-evolucion-table-width:25%;
+  }
   .entrada-evolucion-chart-card{
-    position:relative;
-    height:var(--entrada-evolucion-chart-height,520px);min-height:0;padding:16px 10px 12px;background:#fff;border:1px solid #dce8eb;border-radius:14px;
-    box-shadow:0 8px 24px rgba(16,54,62,.06);display:flex;flex-direction:column;width:100%;box-sizing:border-box
+    position:relative;flex:1 1 0;min-width:0;max-width:100%;height:100%;min-height:0;padding:16px 10px 12px;background:#fff;border:1px solid #dce8eb;border-radius:14px;
+    box-shadow:0 8px 24px rgba(16,54,62,.06);display:flex;flex-direction:column;box-sizing:border-box;overflow:hidden
   }
   .entrada-evolucion-month-zoom{
-    position:absolute;
-    top:44%;
-    right:16px;
-    z-index:14;
-    display:flex;
-    flex-direction:column;
+    position:static;
+    z-index:auto;
+    display:inline-flex;
+    flex-direction:row;
     align-items:center;
-    gap:8px;
-    transform:translateY(-50%);
+    gap:2px;
+    transform:none;
   }
   .entrada-evolucion-month-zoom[hidden]{display:none!important}
   .entrada-evolucion-month-zoom-button{
     width:36px;
     height:36px;
     padding:0;
-    border:1px solid #c9dfe3;
-    border-radius:10px;
-    background:#fff;
+    border:0;
+    border-radius:0;
+    background:transparent;
     color:#007f93;
-    box-shadow:0 5px 14px rgba(16,54,62,.10);
+    box-shadow:none;
     display:inline-flex;
     align-items:center;
     justify-content:center;
     font:700 22px/1 Inter,Segoe UI,Arial,sans-serif;
     cursor:pointer;
-    transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease,box-shadow .16s ease;
+    transition:color .16s ease,transform .16s ease;
   }
   .entrada-evolucion-month-zoom-button:hover:not(:disabled),
   .entrada-evolucion-month-zoom-button:focus-visible:not(:disabled){
-    background:#0093ab;
-    border-color:#0093ab;
-    color:#fff;
-    box-shadow:0 7px 16px rgba(0,147,171,.22);
-    transform:translateY(-1px);
+    background:transparent;
+    color:#0093ab;
+    box-shadow:none;
+    transform:scale(1.08);
     outline:none;
   }
   .entrada-evolucion-month-zoom-button:disabled{
@@ -10033,7 +10038,7 @@
     transform:translateY(-1px);
   }
   @media(max-width:760px){
-    .entrada-evolucion-month-zoom{right:8px;gap:6px}
+    .entrada-evolucion-month-zoom{gap:0}
     .entrada-evolucion-month-zoom-button{width:32px;height:32px;font-size:20px}
   }
   .entrada-evolucion-chart-head{
@@ -10156,10 +10161,97 @@
     width:100vw;height:100vh;box-sizing:border-box;padding:18px 22px;background:#f5f9fa;display:flex;flex-direction:column;gap:12px;overflow:hidden
   }
   .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-mode-row{flex:0 0 auto;margin:0}
-  .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-chart-card{flex:1;height:auto!important;max-height:none;min-height:0}
+  .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-split-layout{flex:1;height:auto!important;max-height:none;min-height:0}
+  .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-chart-card,
+  .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-table-panel,
+  .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-chart-body,
+  .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-chart-pane,
   .entrada-evolucion-visual-panel:fullscreen .entrada-evolucion-chart-wrap{min-height:0}
+  .entrada-evolucion-chart-body{
+    position:relative;display:flex;align-items:stretch;flex:1;min-width:0;min-height:0;overflow:hidden;
+  }
+  .entrada-evolucion-chart-pane{
+    position:relative;display:flex;flex:1 1 auto;min-width:0;min-height:0;overflow:hidden;
+  }
   .entrada-evolucion-chart-wrap{position:relative;min-height:0;flex:1;overflow:visible}
   #entradaEvolucionChart{display:block;width:100%;height:100%;min-height:0;overflow:visible}
+  .entrada-evolucion-table-resizer{
+    position:relative;z-index:18;flex:0 0 23px;width:23px;min-height:0;cursor:col-resize;touch-action:none;
+    background:transparent;outline:none;
+  }
+  .entrada-evolucion-table-resizer::before{
+    content:"";position:absolute;top:10px;bottom:10px;left:10px;width:3px;border-radius:999px;background:#d8e5e7;
+    transition:background .16s ease,box-shadow .16s ease;
+  }
+  .entrada-evolucion-table-resizer:hover::before,
+  .entrada-evolucion-table-resizer:focus-visible::before,
+  .entrada-evolucion-table-resizer.is-dragging::before{
+    background:#0093ab;box-shadow:0 0 0 3px rgba(0,147,171,.12);
+  }
+  .entrada-evolucion-table-panel{
+    flex:0 0 var(--entrada-evolucion-table-width);width:var(--entrada-evolucion-table-width);min-width:0;max-width:55%;height:100%;
+    min-height:0;overflow:hidden;display:flex;flex-direction:column;border:1px solid #dce8eb;border-radius:14px;background:#fff;
+    box-shadow:0 8px 24px rgba(16,54,62,.06);box-sizing:border-box;
+  }
+  .entrada-evolucion-table-panel[hidden],.entrada-evolucion-table-resizer[hidden]{display:none!important}
+  .entrada-evolucion-table-head{
+    flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:38px;padding:8px 10px;
+    border-bottom:1px solid #e2ecee;background:#f7fafb;
+  }
+  .entrada-evolucion-table-head strong{color:#17343b;font-size:13px;font-weight:800}
+  .entrada-evolucion-table-unit{
+    display:inline-flex;align-items:center;justify-content:center;min-height:22px;padding:0 7px;border-radius:999px;
+    background:#e8f5f7;color:#007f93;font-size:12px;font-weight:800;white-space:nowrap;
+  }
+  .entrada-evolucion-table-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:3px;min-width:0}
+  .entrada-evolucion-table-more{position:relative;display:flex;align-items:center}
+  .entrada-evolucion-table-more-button{
+    width:26px;height:26px;padding:0;border:0!important;border-radius:7px;background:transparent!important;color:#60777d;
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;
+    transition:opacity .15s ease,color .15s ease,background .15s ease;box-shadow:none!important;
+  }
+  .entrada-evolucion-table-head:hover .entrada-evolucion-table-more-button,
+  .entrada-evolucion-table-more:focus-within .entrada-evolucion-table-more-button,
+  .entrada-evolucion-table-more.is-open .entrada-evolucion-table-more-button{opacity:1;pointer-events:auto}
+  .entrada-evolucion-table-more-button:hover,
+  .entrada-evolucion-table-more-button:focus-visible{background:#e9f3f5!important;color:#007f93;outline:none}
+  .entrada-evolucion-table-more-button svg{width:17px;height:17px;display:block}
+  .entrada-evolucion-table-menu{
+    position:absolute;z-index:40;right:0;top:calc(100% + 6px);min-width:172px;padding:5px;border:1px solid #dce8eb;
+    border-radius:10px;background:#fff;box-shadow:0 12px 30px rgba(16,54,62,.16);
+  }
+  .entrada-evolucion-table-menu[hidden]{display:none!important}
+  .entrada-evolucion-table-menu button{
+    width:100%;min-height:34px;padding:7px 9px;border:0;border-radius:7px;background:transparent;color:#29464d;
+    display:flex;align-items:center;gap:8px;font:inherit;font-size:12px;font-weight:600;text-align:left;cursor:pointer;
+  }
+  .entrada-evolucion-table-menu button:hover,
+  .entrada-evolucion-table-menu button:focus-visible{background:#eef8f9;color:#007f93;outline:none}
+  .entrada-evolucion-table-menu button svg{width:16px;height:16px;flex:0 0 auto}
+  .entrada-evolucion-table-scroll{
+    flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none;
+  }
+  .entrada-evolucion-table-scroll::-webkit-scrollbar{display:none;width:0;height:0}
+  .entrada-evolucion-data-table{width:100%;min-width:0!important;max-width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+  .entrada-evolucion-data-table th{
+    position:sticky;top:0;z-index:2;height:36px;padding:6px 7px;border-bottom:1px solid #dfeaec;background:#fff;
+    color:#526a70;font-size:12px;font-weight:800;text-align:right;line-height:1.15;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .entrada-evolucion-data-table th:first-child{text-align:left}
+  .entrada-evolucion-data-table td{
+    height:34px;padding:6px 7px;border-bottom:1px solid #edf2f3;color:#253f45;font-size:12px;font-weight:400;
+    text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .entrada-evolucion-data-table td:first-child{text-align:left;color:#60757a;font-weight:700}
+  .entrada-evolucion-data-table tbody tr:nth-child(even) td{background:#fbfcfc}
+  .entrada-evolucion-data-table tbody tr:hover td{background:#eef8f9}
+  .entrada-evolucion-table-empty{padding:26px 12px;color:#71858a;font-size:12px;text-align:center}
+  @media(max-width:900px){
+    .entrada-evolucion-chart-card{min-width:0}
+    .entrada-evolucion-table-panel{min-width:0}
+    .entrada-evolucion-data-table th,.entrada-evolucion-data-table td{padding-left:5px;padding-right:5px;font-size:12px}
+  }
   .entrada-evolucion-grid{stroke:#e8eff1;stroke-width:1}
   .entrada-evolucion-month-divider{stroke:#dfe7e3;stroke-width:1;opacity:.72;pointer-events:none}
   .entrada-evolucion-today-line{stroke:#71827b;stroke-width:1.25;stroke-dasharray:4 5;opacity:.52;pointer-events:none}
@@ -11791,6 +11883,9 @@
           </div>
         </div>
         <div class="entrada-evolucion-truck-command" aria-label="Simulación de camiones en evolución">
+          <button class="truck-view-toggle" id="toggleEntradaEvolucionTable" type="button" aria-pressed="false" title="Mostrar tabla junto al gráfico" aria-label="Mostrar tabla junto al gráfico">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11M3 14h18"/></svg>
+          </button>
           <button class="truck-view-toggle" id="toggleEntradaEvolucionThinLine" type="button" aria-pressed="false" title="Línea más fina" aria-label="Línea más fina">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16c3-8 6-8 8-4s5 4 8-4" stroke-width="1.4"/></svg>
           </button>
@@ -11806,42 +11901,81 @@
           </button>
         </div>
       </div>
-      <div class="entrada-evolucion-chart-card">
-        <div class="entrada-evolucion-chart-head">
-          <div class="entrada-evolucion-chart-title-block">
-            <h2 id="entradaEvolucionChartTitle">Evolución acumulada diaria</h2>
-            <p id="entradaEvolucionChartSubtitle">Volumen diario en kg</p>
-          </div>
-          <div class="entrada-evolucion-chart-center">
-            <div class="entrada-evolucion-silo-navigator" id="entradaEvolucionSiloNavigator" aria-label="Navegar por los silos seleccionados">
-              <button class="entrada-evolucion-silo-nav-button" id="entradaEvolucionSiloPrevious" type="button" title="Ver silo anterior" aria-label="Ver silo anterior">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      <div class="entrada-evolucion-split-layout" id="entradaEvolucionChartBody">
+        <div class="entrada-evolucion-chart-card">
+          <div class="entrada-evolucion-chart-head">
+            <div class="entrada-evolucion-chart-title-block">
+              <h2 id="entradaEvolucionChartTitle">Evolución acumulada diaria</h2>
+              <p id="entradaEvolucionChartSubtitle">Volumen diario en kg</p>
+            </div>
+            <div class="entrada-evolucion-chart-center">
+              <div class="entrada-evolucion-silo-navigator" id="entradaEvolucionSiloNavigator" aria-label="Navegar por los silos seleccionados">
+                <button class="entrada-evolucion-silo-nav-button" id="entradaEvolucionSiloPrevious" type="button" title="Ver silo anterior" aria-label="Ver silo anterior">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <div class="entrada-evolucion-silo-nav-value" id="entradaEvolucionSiloViewLabel" title="Todos los silos">Todos los silos</div>
+                <button class="entrada-evolucion-silo-nav-button" id="entradaEvolucionSiloNext" type="button" title="Ver siguiente silo" aria-label="Ver siguiente silo">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </div>
+              <div class="entrada-evolucion-chart-legend" id="entradaEvolucionChartLegend" aria-label="Leyenda del gráfico" hidden></div>
+            </div>
+            <div class="entrada-evolucion-chart-tools">
+              <div class="entrada-evolucion-month-zoom" id="entradaEvolucionMonthZoom" aria-label="Zoom de meses" hidden>
+                <button class="entrada-evolucion-month-zoom-button" id="entradaEvolucionZoomOut" type="button" title="Mostrar dos meses menos" aria-label="Mostrar dos meses menos"><span aria-hidden="true">−</span></button>
+                <button class="entrada-evolucion-month-zoom-button" id="entradaEvolucionZoomIn" type="button" title="Mostrar dos meses más" aria-label="Mostrar dos meses más"><span aria-hidden="true">+</span></button>
+              </div>
+              <button class="entrada-evolucion-chart-fullscreen" id="fullscreenEntradaEvolucion" type="button" title="Ver gráfico en pantalla completa" aria-label="Ver gráfico en pantalla completa" aria-pressed="false">
+                <svg class="fullscreen-expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+                <svg class="fullscreen-collapse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/></svg>
               </button>
-              <div class="entrada-evolucion-silo-nav-value" id="entradaEvolucionSiloViewLabel" title="Todos los silos">Todos los silos</div>
-              <button class="entrada-evolucion-silo-nav-button" id="entradaEvolucionSiloNext" type="button" title="Ver siguiente silo" aria-label="Ver siguiente silo">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              <button class="entrada-evolucion-chart-share" id="shareEntradaEvolucion" type="button" title="Compartir gráfico de evolución" aria-label="Compartir gráfico de evolución">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>
               </button>
             </div>
-            <div class="entrada-evolucion-chart-legend" id="entradaEvolucionChartLegend" aria-label="Leyenda del gráfico" hidden></div>
           </div>
-          <div class="entrada-evolucion-chart-tools">
-            <button class="entrada-evolucion-chart-fullscreen" id="fullscreenEntradaEvolucion" type="button" title="Ver gráfico en pantalla completa" aria-label="Ver gráfico en pantalla completa" aria-pressed="false">
-              <svg class="fullscreen-expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
-              <svg class="fullscreen-collapse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/></svg>
-            </button>
-            <button class="entrada-evolucion-chart-share" id="shareEntradaEvolucion" type="button" title="Compartir gráfico de evolución" aria-label="Compartir gráfico de evolución">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>
-            </button>
+          <div class="entrada-evolucion-chart-body">
+            <div class="entrada-evolucion-chart-pane" id="entradaEvolucionChartPane">
+              <div class="entrada-evolucion-chart-wrap">
+                <svg id="entradaEvolucionChart" role="img" aria-label="Gráfico de línea de evolución de entrada"></svg>
+                <div class="entrada-evolucion-tooltip" id="entradaEvolucionTooltip" hidden></div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="entrada-evolucion-chart-wrap">
-          <svg id="entradaEvolucionChart" role="img" aria-label="Gráfico de línea de evolución de entrada"></svg>
-          <div class="entrada-evolucion-tooltip" id="entradaEvolucionTooltip" hidden></div>
-        </div>
-        <div class="entrada-evolucion-month-zoom" id="entradaEvolucionMonthZoom" aria-label="Zoom de meses" hidden>
-          <button class="entrada-evolucion-month-zoom-button" id="entradaEvolucionZoomIn" type="button" title="Mostrar dos meses más" aria-label="Mostrar dos meses más"><span aria-hidden="true">+</span></button>
-          <button class="entrada-evolucion-month-zoom-button" id="entradaEvolucionZoomOut" type="button" title="Mostrar dos meses menos" aria-label="Mostrar dos meses menos"><span aria-hidden="true">−</span></button>
-        </div>
+        <div class="entrada-evolucion-table-resizer" id="entradaEvolucionTableResizer" role="separator" aria-label="Ajustar ancho del gráfico y de la tabla" aria-orientation="vertical" aria-valuemin="18" aria-valuemax="55" aria-valuenow="25" tabindex="0" hidden></div>
+        <aside class="entrada-evolucion-table-panel" id="entradaEvolucionTablePanel" aria-label="Tabla de evolución por día" hidden>
+          <div class="entrada-evolucion-table-head">
+            <strong>Detalle por día</strong>
+            <div class="entrada-evolucion-table-head-actions">
+              <div class="entrada-evolucion-table-more" id="entradaEvolucionTableMore">
+                <button class="entrada-evolucion-table-more-button" id="entradaEvolucionTableMoreButton" type="button" title="Más opciones" aria-label="Más opciones de la tabla" aria-haspopup="menu" aria-expanded="false">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+                </button>
+                <div class="entrada-evolucion-table-menu" id="entradaEvolucionTableMenu" role="menu" hidden>
+                  <button id="exportEntradaEvolucionTableExcel" type="button" role="menuitem">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="m9 13 6 6M15 13l-6 6"/></svg>
+                    <span>Exportar a Excel</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="entrada-evolucion-table-scroll">
+            <table class="entrada-evolucion-data-table">
+              <colgroup>
+                <col style="width:22%">
+                <col style="width:39%">
+                <col style="width:39%">
+              </colgroup>
+              <thead>
+                <tr><th>Día</th><th id="entradaEvolucionTablePrimaryHeader" title="Proyecto">Proyecto</th><th id="entradaEvolucionTableCompareHeader" title="Comparado con">Comparado con</th></tr>
+              </thead>
+              <tbody id="entradaEvolucionTableBody"></tbody>
+            </table>
+            <div class="entrada-evolucion-table-empty" id="entradaEvolucionTableEmpty" hidden>No hay datos para este período.</div>
+          </div>
+        </aside>
       </div>
       </div>
     </div>
@@ -17436,6 +17570,16 @@ let entradaEvolucionZoomBaseDateTo="";
 let entradaEvolucionZoomBaseMonthFrom=0;
 let entradaEvolucionZoomBaseMonthTo=11;
 let entradaEvolucionAccumulatedPeriodManual=false;
+let entradaEvolucionTableOpen=false;
+let entradaEvolucionTableWidth=25;
+let entradaEvolucionLastChartDaily=[];
+let entradaEvolucionLastChartCompareDaily=[];
+let entradaEvolucionLastChartRecords=[];
+let entradaEvolucionLastChartCompareRecords=[];
+let entradaEvolucionTableRenderFrame=0;
+let entradaEvolucionTableExportRows=[];
+const ENTRADA_EVOLUCION_TABLE_MIN_WIDTH=18;
+const ENTRADA_EVOLUCION_TABLE_MAX_WIDTH=55;
 const ENTRADA_EVOLUCION_ZOOM_DEFAULT_MONTHS=4;
 const ENTRADA_EVOLUCION_ZOOM_MIN_MONTHS=2;
 let selectedEntradaEvolucionSilos=new Set();
@@ -17480,6 +17624,11 @@ function restoreEntradaEvolucionFilters(projects){
   entradaEvolucionZoomBaseMonthFrom=Number.isInteger(Number(saved.zoomBaseMonthFrom))?Math.max(0,Math.min(11,Number(saved.zoomBaseMonthFrom))):Math.max(0,Math.min(11,Number(fromRange?.value??0)));
   entradaEvolucionZoomBaseMonthTo=Number.isInteger(Number(saved.zoomBaseMonthTo))?Math.max(entradaEvolucionZoomBaseMonthFrom,Math.min(11,Number(saved.zoomBaseMonthTo))):Math.max(entradaEvolucionZoomBaseMonthFrom,Math.min(11,Number(toRange?.value??11)));
   entradaEvolucionAccumulatedPeriodManual=Boolean(saved.accumulatedPeriodManual);
+  entradaEvolucionTableOpen=Boolean(saved.tableOpen);
+  entradaEvolucionTableWidth=Number.isFinite(Number(saved.tableWidth))
+    ?Math.max(ENTRADA_EVOLUCION_TABLE_MIN_WIDTH,Math.min(ENTRADA_EVOLUCION_TABLE_MAX_WIDTH,Number(saved.tableWidth)))
+    :25;
+  syncEntradaEvolucionTableLayout();
   syncEntradaEvolucionPeriodSlider();
   syncEntradaEvolucionPeriodMode();
 }
@@ -17500,6 +17649,8 @@ function saveEntradaEvolucionFilters(){
       mode:entradaEvolucionMode,
       dailyPeriodManual:entradaEvolucionDailyPeriodManual,
       accumulatedPeriodManual:entradaEvolucionAccumulatedPeriodManual,
+      tableOpen:entradaEvolucionTableOpen,
+      tableWidth:Number(entradaEvolucionTableWidth),
       showPoints:entradaEvolucionShowPoints,
       thinLine:entradaEvolucionThinLine
     }));
@@ -17972,6 +18123,288 @@ function renderEntradaImportSiloOptions(){
   const label=$("#entradaImportFilterSiloLabel");
   if(label)label.textContent=!selectedEntradaImportSilos.size?"Todos los silos":selectedEntradaImportSilos.size===1?[...selectedEntradaImportSilos][0]:`${selectedEntradaImportSilos.size} silos seleccionados`;
 }
+function syncEntradaEvolucionTableLayout(){
+  const body=$("#entradaEvolucionChartBody");
+  const panel=$("#entradaEvolucionTablePanel");
+  const resizer=$("#entradaEvolucionTableResizer");
+  const button=$("#toggleEntradaEvolucionTable");
+  entradaEvolucionTableWidth=Math.max(ENTRADA_EVOLUCION_TABLE_MIN_WIDTH,Math.min(ENTRADA_EVOLUCION_TABLE_MAX_WIDTH,Number(entradaEvolucionTableWidth)||25));
+  if(body)body.style.setProperty("--entrada-evolucion-table-width",`${entradaEvolucionTableWidth}%`);
+  if(panel)panel.hidden=!entradaEvolucionTableOpen;
+  if(resizer){
+    resizer.hidden=!entradaEvolucionTableOpen;
+    resizer.setAttribute("aria-valuenow",String(Math.round(entradaEvolucionTableWidth)));
+    resizer.tabIndex=entradaEvolucionTableOpen?0:-1;
+  }
+  if(button){
+    button.classList.toggle("active",entradaEvolucionTableOpen);
+    button.setAttribute("aria-pressed",String(entradaEvolucionTableOpen));
+    const label=entradaEvolucionTableOpen?"Ocultar tabla junto al gráfico":"Mostrar tabla junto al gráfico";
+    button.title=label;
+    button.setAttribute("aria-label",label);
+  }
+}
+function formatEntradaEvolucionTableValue(value){
+  const numeric=Math.max(0,Number(value)||0);
+  if(truckSimulation.showTrucks){
+    const count=Math.round(numeric);
+    return `${formatTruckCount(numeric)} ${count===1?"camión":"camiones"}`;
+  }
+  return `${kg(numeric)} kg`;
+}
+function renderEntradaEvolucionDataTable(dates,firstSeries,secondSeries){
+  const tbody=$("#entradaEvolucionTableBody");
+  const empty=$("#entradaEvolucionTableEmpty");
+  if(!tbody)return;
+  const primaryMap=new Map(Array.isArray(firstSeries)?firstSeries:[]);
+  const compareMap=new Map(Array.isArray(secondSeries)?secondSeries:[]);
+  const rows=Array.isArray(dates)?dates:[];
+  let previousPrimaryValue=0;
+  let previousCompareValue=0;
+  const visibleRows=rows.filter((date,index)=>{
+    const primaryValue=Number(primaryMap.get(date)||0);
+    const compareValue=Number(compareMap.get(date)||0);
+    const hasValue=Math.abs(primaryValue)>1e-9||Math.abs(compareValue)>1e-9;
+    if(entradaEvolucionMode!=="acumulada")return hasValue;
+    const primaryChanged=index===0
+      ?Math.abs(primaryValue)>1e-9
+      :Math.abs(primaryValue-previousPrimaryValue)>1e-9;
+    const compareChanged=index===0
+      ?Math.abs(compareValue)>1e-9
+      :Math.abs(compareValue-previousCompareValue)>1e-9;
+    previousPrimaryValue=primaryValue;
+    previousCompareValue=compareValue;
+    return hasValue&&(primaryChanged||compareChanged);
+  });
+  entradaEvolucionTableExportRows=visibleRows.map(date=>{
+    const [month,day]=String(date||"").split("-");
+    const primaryValue=Number(primaryMap.get(date)||0);
+    const compareValue=Number(compareMap.get(date)||0);
+    return {
+      date:String(date||""),
+      dateLabel:`${day||"—"}/${month||"—"}`,
+      primaryValue:truckSimulation.showTrucks?Math.round(primaryValue):primaryValue,
+      compareValue:truckSimulation.showTrucks?Math.round(compareValue):compareValue
+    };
+  });
+  tbody.innerHTML=visibleRows.map(date=>{
+    const [month,day]=String(date||"").split("-");
+    const primaryValue=Number(primaryMap.get(date)||0);
+    const compareValue=Number(compareMap.get(date)||0);
+    const primaryText=formatEntradaEvolucionTableValue(primaryValue);
+    const compareText=compareEntradaEvolucionProject?formatEntradaEvolucionTableValue(compareValue):"—";
+    return `<tr><td>${esc(`${day||"—"}/${month||"—"}`)}</td><td title="${esc(primaryText)}">${esc(primaryText)}</td><td title="${esc(compareText)}">${esc(compareText)}</td></tr>`;
+  }).join("");
+  if(empty)empty.hidden=visibleRows.length>0;
+  const table=tbody.closest("table");
+  if(table)table.hidden=!visibleRows.length;
+  const primaryHeader=$("#entradaEvolucionTablePrimaryHeader");
+  const compareHeader=$("#entradaEvolucionTableCompareHeader");
+  const primaryProjectName=activeEntradaEvolucionProject||"Proyecto";
+  const compareProjectName=compareEntradaEvolucionProject||"Comparado con";
+  if(primaryHeader){
+    primaryHeader.textContent=primaryProjectName;
+    primaryHeader.title=primaryProjectName;
+  }
+  if(compareHeader){
+    compareHeader.textContent=compareProjectName;
+    compareHeader.title=compareProjectName;
+  }
+}
+function setEntradaEvolucionTableMenuOpen(open){
+  const wrapper=$("#entradaEvolucionTableMore");
+  const button=$("#entradaEvolucionTableMoreButton");
+  const menu=$("#entradaEvolucionTableMenu");
+  const next=Boolean(open);
+  if(wrapper)wrapper.classList.toggle("is-open",next);
+  if(button)button.setAttribute("aria-expanded",String(next));
+  if(menu)menu.hidden=!next;
+}
+function entradaEvolucionSafeFilePart(value){
+  return String(value||"")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9_-]+/g,"_").replace(/^_+|_+$/g,"").toLowerCase()||"proyecto";
+}
+function createEntradaEvolucionTableWorkbook(rows){
+  const unit=truckSimulation.showTrucks?"camiones":"kg";
+  const primaryName=activeEntradaEvolucionProject||"Proyecto";
+  const compareName=compareEntradaEvolucionProject||"Comparado con";
+  const columns=[
+    {label:"Día",width:14,type:"text"},
+    {label:primaryName,width:30,type:"number"},
+    {label:compareName,width:30,type:"number"}
+  ];
+  const headerCells=columns.map((column,index)=>`<c r="${xlsxColumnName(index)}1" s="1" t="inlineStr"><is><t>${xlsxXmlEscape(column.label)}</t></is></c>`).join("");
+  const bodyRows=rows.map((row,rowIndex)=>{
+    const excelRow=rowIndex+2;
+    const compareValue=compareEntradaEvolucionProject?Number(row.compareValue||0):null;
+    return `<row r="${excelRow}">`+
+      `<c r="A${excelRow}" s="0" t="inlineStr"><is><t>${xlsxXmlEscape(row.dateLabel)}</t></is></c>`+
+      `<c r="B${excelRow}" s="2"><v>${Number(row.primaryValue||0)}</v></c>`+
+      (compareValue===null
+        ?`<c r="C${excelRow}" s="0" t="inlineStr"><is><t>—</t></is></c>`
+        :`<c r="C${excelRow}" s="2"><v>${compareValue}</v></c>`)+
+      `</row>`;
+  }).join("");
+  const colXml=columns.map((column,index)=>`<col min="${index+1}" max="${index+1}" width="${column.width}" customWidth="1"/>`).join("");
+  const lastRow=Math.max(1,rows.length+1);
+  const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+  <cols>${colXml}</cols>
+  <sheetData><row r="1" ht="24" customHeight="1">${headerCells}</row>${bodyRows}</sheetData>
+  <autoFilter ref="A1:C${lastRow}"/>
+</worksheet>`;
+  const sheetName=entradaEvolucionMode==="acumulada"?"Evolución acumulada":"Evolución diaria";
+  const files=[
+    {name:"[Content_Types].xml",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`},
+    {name:"_rels/.rels",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`},
+    {name:"xl/workbook.xml",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets><sheet name="${xlsxXmlEscape(sheetName)}" sheetId="1" r:id="rId1"/></sheets>
+</workbook>`},
+    {name:"xl/_rels/workbook.xml.rels",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`},
+    {name:"xl/styles.xml",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="2"><font><sz val="11"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Aptos"/></font></fonts>
+  <fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0093AB"/><bgColor indexed="64"/></patternFill></fill></fills>
+  <borders count="2"><border/><border><bottom style="thin"><color rgb="FFD9E2DE"/></bottom></border></borders>
+  <numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0"/></numFmts>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="3">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"><alignment vertical="center"/></xf>
+    <xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"><alignment horizontal="right"/></xf>
+  </cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`},
+    {name:"xl/worksheets/sheet1.xml",data:sheet}
+  ];
+  return new Blob([createStoredZip(files)],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function exportEntradaEvolucionTableToExcel(){
+  const rows=Array.isArray(entradaEvolucionTableExportRows)?entradaEvolucionTableExportRows:[];
+  if(!rows.length){
+    toast("No hay datos visibles para exportar.");
+    return;
+  }
+  const blob=createEntradaEvolucionTableWorkbook(rows);
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement("a");
+  const mode=entradaEvolucionMode==="acumulada"?"acumulada":"diaria";
+  const unit=truckSimulation.showTrucks?"camiones":"kg";
+  const project=entradaEvolucionSafeFilePart(activeEntradaEvolucionProject);
+  link.href=url;
+  link.download=`evolucion_${mode}_${project}_${unit}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  setEntradaEvolucionTableMenuOpen(false);
+  toast(`Excel generado con ${rows.length} días.`);
+}
+function scheduleEntradaEvolucionChartPaneRender(){
+  cancelAnimationFrame(entradaEvolucionTableRenderFrame);
+  entradaEvolucionTableRenderFrame=requestAnimationFrame(()=>{
+    if(!Array.isArray(entradaEvolucionLastChartDaily))return;
+    renderEntradaEvolucionChart(entradaEvolucionLastChartDaily,entradaEvolucionLastChartCompareDaily);
+  });
+}
+function setEntradaEvolucionTableWidth(value,{save=false}={}){
+  entradaEvolucionTableWidth=Math.max(ENTRADA_EVOLUCION_TABLE_MIN_WIDTH,Math.min(ENTRADA_EVOLUCION_TABLE_MAX_WIDTH,Number(value)||25));
+  syncEntradaEvolucionTableLayout();
+  scheduleEntradaEvolucionChartPaneRender();
+  if(save)saveEntradaEvolucionFilters();
+}
+function initializeEntradaEvolucionTableResizer(){
+  const resizer=$("#entradaEvolucionTableResizer");
+  const body=$("#entradaEvolucionChartBody");
+  if(!resizer||!body||resizer.dataset.bound==="true")return;
+  resizer.dataset.bound="true";
+  let dragging=false;
+  const updateFromPointer=clientX=>{
+    const rect=body.getBoundingClientRect();
+    const resizerWidth=resizer.getBoundingClientRect().width||23;
+    const usableWidth=Math.max(1,rect.width-resizerWidth);
+    if(!rect.width)return;
+    setEntradaEvolucionTableWidth(((rect.right-clientX)/usableWidth)*100);
+  };
+  resizer.addEventListener("pointerdown",event=>{
+    if(!entradaEvolucionTableOpen)return;
+    dragging=true;
+    resizer.classList.add("is-dragging");
+    resizer.setPointerCapture?.(event.pointerId);
+    updateFromPointer(event.clientX);
+    event.preventDefault();
+  });
+  resizer.addEventListener("pointermove",event=>{
+    if(!dragging)return;
+    updateFromPointer(event.clientX);
+  });
+  const finish=event=>{
+    if(!dragging)return;
+    dragging=false;
+    resizer.classList.remove("is-dragging");
+    try{resizer.releasePointerCapture?.(event.pointerId)}catch(error){}
+    saveEntradaEvolucionFilters();
+  };
+  resizer.addEventListener("pointerup",finish);
+  resizer.addEventListener("pointercancel",finish);
+  resizer.addEventListener("keydown",event=>{
+    if(event.key!=="ArrowLeft"&&event.key!=="ArrowRight")return;
+    event.preventDefault();
+    const direction=event.key==="ArrowLeft"?2:-2;
+    setEntradaEvolucionTableWidth(entradaEvolucionTableWidth+direction,{save:true});
+  });
+}
+function updateEntradaEvolucionSummaryCards(primaryRecords=[],compareRecords=[]){
+  const filtered=Array.isArray(primaryRecords)?primaryRecords:[];
+  const compared=Array.isArray(compareRecords)?compareRecords:[];
+  const total=filtered.reduce((sum,item)=>sum+Number(item.entryKg||0),0);
+  const compareTotal=compared.reduce((sum,item)=>sum+Number(item.entryKg||0),0);
+  const siloCount=new Set(filtered.map(item=>item.silo).filter(Boolean)).size;
+  const compareSiloCount=new Set(compared.map(item=>item.silo).filter(Boolean)).size;
+  const summaryRows=(primaryValue,compareValue,suffix="")=>`<span class="entrada-summary-row">
+      <span class="entrada-summary-project"><i></i><span>${esc(activeEntradaEvolucionProject)}</span></span>
+      <b class="entrada-summary-value">${esc(primaryValue)}${suffix}</b>
+    </span>${compareEntradaEvolucionProject?`<span class="entrada-summary-row compare">
+      <span class="entrada-summary-project"><i></i><span>${esc(compareEntradaEvolucionProject)}</span></span>
+      <b class="entrada-summary-value">${esc(compareValue)}${suffix}</b>
+    </span>`:""}`;
+  const summaryDifference=(primaryValue,compareValue)=>{
+    if(!compareEntradaEvolucionProject)return "";
+    const primary=Number(primaryValue)||0;
+    const comparison=Number(compareValue)||0;
+    if(!comparison){
+      return `<span class="entrada-summary-difference"><span>Diferencia</span><b>—</b></span>`;
+    }
+    const percentage=((primary-comparison)/comparison)*100;
+    const state=percentage>0?"is-positive":percentage<0?"is-negative":"";
+    const arrow=percentage>0?"↑":percentage<0?"↓":"";
+    const formatted=Math.abs(percentage).toLocaleString("es-PY",{minimumFractionDigits:1,maximumFractionDigits:1});
+    return `<span class="entrada-summary-difference ${state}"><span>Diferencia</span><b>${arrow} ${formatted}%</b></span>`;
+  };
+  const evolutionValue=value=>truckSimulation.showTrucks
+    ?truckCountPlain(value)
+    :`${new Intl.NumberFormat("es-PY",{maximumFractionDigits:0}).format(Number(value||0)/1000)} ton`;
+  if($("#entradaEvolucionTotal"))$("#entradaEvolucionTotal").innerHTML=summaryRows(evolutionValue(total),evolutionValue(compareTotal))+summaryDifference(total,compareTotal);
+  if($("#entradaEvolucionCount"))$("#entradaEvolucionCount").innerHTML=summaryRows(kg(filtered.length),kg(compared.length))+summaryDifference(filtered.length,compared.length);
+  if($("#entradaEvolucionSilos"))$("#entradaEvolucionSilos").innerHTML=summaryRows(kg(siloCount),kg(compareSiloCount));
+}
 function renderEntradaEvolucion(){
   if(entradaEvolucionRenderSuspended)return;
   const records=Array.isArray(db.entradaEvolucion)?db.entradaEvolucion:[];
@@ -18002,6 +18435,8 @@ function renderEntradaEvolucion(){
   if(empty)empty.hidden=records.length>0;
   if(content)content.hidden=!records.length;
   if(!records.length)return;
+  syncEntradaEvolucionTableLayout();
+  initializeEntradaEvolucionTableResizer();
   requestAnimationFrame(syncEntradaEvolucionChartHeight);
   const projects=entradaEvolucionProjects();
   restoreEntradaEvolucionFilters(projects);
@@ -18082,36 +18517,8 @@ function renderEntradaEvolucion(){
   };
   const daily=toDaily(chartFiltered);
   const compareDaily=toDaily(chartCompared);
-  const total=filtered.reduce((sum,item)=>sum+Number(item.entryKg||0),0);
-  const compareTotal=compared.reduce((sum,item)=>sum+Number(item.entryKg||0),0);
-  const siloCount=new Set(filtered.map(item=>item.silo)).size;
-  const compareSiloCount=new Set(compared.map(item=>item.silo)).size;
-  const summaryRows=(primaryValue,compareValue,suffix="")=>`<span class="entrada-summary-row">
-      <span class="entrada-summary-project"><i></i><span>${esc(activeEntradaEvolucionProject)}</span></span>
-      <b class="entrada-summary-value">${esc(primaryValue)}${suffix}</b>
-    </span>${compareEntradaEvolucionProject?`<span class="entrada-summary-row compare">
-      <span class="entrada-summary-project"><i></i><span>${esc(compareEntradaEvolucionProject)}</span></span>
-      <b class="entrada-summary-value">${esc(compareValue)}${suffix}</b>
-    </span>`:""}`;
-  const summaryDifference=(primaryValue,compareValue)=>{
-    if(!compareEntradaEvolucionProject)return "";
-    const primary=Number(primaryValue)||0;
-    const comparison=Number(compareValue)||0;
-    if(!comparison){
-      return `<span class="entrada-summary-difference"><span>Diferencia</span><b>—</b></span>`;
-    }
-    const percentage=((primary-comparison)/comparison)*100;
-    const state=percentage>0?"is-positive":percentage<0?"is-negative":"";
-    const arrow=percentage>0?"↑":percentage<0?"↓":"";
-    const formatted=Math.abs(percentage).toLocaleString("es-PY",{minimumFractionDigits:1,maximumFractionDigits:1});
-    return `<span class="entrada-summary-difference ${state}"><span>Diferencia</span><b>${arrow} ${formatted}%</b></span>`;
-  };
-  const evolutionValue=value=>truckSimulation.showTrucks
-    ?truckCountPlain(value)
-    :`${new Intl.NumberFormat("es-PY",{maximumFractionDigits:0}).format(Number(value||0)/1000)} ton`;
-  if($("#entradaEvolucionTotal"))$("#entradaEvolucionTotal").innerHTML=summaryRows(evolutionValue(total),evolutionValue(compareTotal))+summaryDifference(total,compareTotal);
-  if($("#entradaEvolucionCount"))$("#entradaEvolucionCount").innerHTML=summaryRows(kg(filtered.length),kg(compared.length))+summaryDifference(filtered.length,compared.length);
-  if($("#entradaEvolucionSilos"))$("#entradaEvolucionSilos").innerHTML=summaryRows(kg(siloCount),kg(compareSiloCount));
+  entradaEvolucionLastChartRecords=chartFiltered;
+  entradaEvolucionLastChartCompareRecords=chartCompared;
   const isAccumulated=entradaEvolucionMode==="acumulada";
   const chartTitle=$("#entradaEvolucionChartTitle");
   if(chartTitle)chartTitle.textContent=isAccumulated?"Evolución acumulada diaria":"Evolución de entrada diaria";
@@ -18133,12 +18540,12 @@ function renderEntradaEvolucion(){
   renderEntradaEvolucionChart(daily,compareDaily);
 }
 function syncEntradaEvolucionChartHeight(){
-  const card=document.querySelector("#view-entrada-evolucion .entrada-evolucion-chart-card");
-  if(!card||card.closest("[hidden]"))return;
+  const layout=document.querySelector("#view-entrada-evolucion .entrada-evolucion-split-layout");
+  if(!layout||layout.closest("[hidden]"))return;
   const viewportHeight=window.visualViewport?.height||window.innerHeight;
-  const top=card.getBoundingClientRect().top;
+  const top=layout.getBoundingClientRect().top;
   const available=Math.floor(viewportHeight-top-20);
-  card.style.setProperty("--entrada-evolucion-chart-height",`${Math.max(340,available)}px`);
+  layout.style.setProperty("--entrada-evolucion-chart-height",`${Math.max(340,available)}px`);
 }
 window.addEventListener("resize",()=>requestAnimationFrame(syncEntradaEvolucionChartHeight),{passive:true});
 window.visualViewport?.addEventListener("resize",()=>requestAnimationFrame(syncEntradaEvolucionChartHeight),{passive:true});
@@ -18155,7 +18562,8 @@ function scheduleEntradaEvolucionResponsiveRender(){
 }
 function initializeEntradaEvolucionResizeObserver(){
   const card=document.querySelector("#view-entrada-evolucion .entrada-evolucion-chart-card");
-  if(!card||!("ResizeObserver" in window))return;
+  const layout=document.querySelector("#view-entrada-evolucion .entrada-evolucion-split-layout");
+  if(!card||!layout||!("ResizeObserver" in window))return;
   new ResizeObserver(entries=>{
     const width=Math.round(entries[0]?.contentRect?.width||0);
     if(!width||Math.abs(width-entradaEvolucionObservedWidth)<2)return;
@@ -18225,6 +18633,8 @@ function changeEntradaEvolucionMonthZoom(step){
   saveEntradaEvolucionFilters();
 }
 function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
+  entradaEvolucionLastChartDaily=Array.isArray(daily)?daily:[];
+  entradaEvolucionLastChartCompareDaily=Array.isArray(compareDaily)?compareDaily:[];
   const svg=$("#entradaEvolucionChart");
   if(!svg)return;
   const height=440;
@@ -18355,6 +18765,10 @@ function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
   const activeDateSet=new Set(allDates);
   const activeVisibleDaily=visibleDaily.filter(([date])=>activeDateSet.has(date));
   const activeVisibleCompareDaily=visibleCompareDaily.filter(([date])=>activeDateSet.has(date));
+  const recordMatchesVisibleDate=item=>activeDateSet.has(String(item?.date||"").slice(5));
+  const visiblePrimaryRecords=(Array.isArray(entradaEvolucionLastChartRecords)?entradaEvolucionLastChartRecords:[]).filter(recordMatchesVisibleDate);
+  const visibleCompareRecords=(Array.isArray(entradaEvolucionLastChartCompareRecords)?entradaEvolucionLastChartCompareRecords:[]).filter(recordMatchesVisibleDate);
+  updateEntradaEvolucionSummaryCards(visiblePrimaryRecords,visibleCompareRecords);
   const chartValue=value=>truckSimulation.showTrucks?trucksFromKg(value):Number(value||0);
   let firstRunning=0,secondRunning=0;
   const firstRawSeries=allDates.map(date=>{
@@ -18369,6 +18783,7 @@ function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
   });
   const firstSeries=firstRawSeries;
   const secondSeries=secondRawSeries;
+  renderEntradaEvolucionDataTable(allDates,firstSeries,secondSeries);
   const maxValue=Math.max(1,...firstSeries.map(([,value])=>value),...secondSeries.map(([,value])=>value));
   const niceAxisMaximum=value=>{
     if(!truckSimulation.showTrucks)return Math.ceil(value/1000000)*1000000||1;
@@ -23053,6 +23468,35 @@ $("#toggleEntradaEvolucionThinLine")?.addEventListener("click",()=>{
   }
   saveEntradaEvolucionFilters();
   renderEntradaEvolucion();
+});
+
+
+$("#toggleEntradaEvolucionTable")?.addEventListener("click",()=>{
+  entradaEvolucionTableOpen=!entradaEvolucionTableOpen;
+  if(!entradaEvolucionTableOpen)setEntradaEvolucionTableMenuOpen(false);
+  syncEntradaEvolucionTableLayout();
+  initializeEntradaEvolucionTableResizer();
+  saveEntradaEvolucionFilters();
+  requestAnimationFrame(()=>{
+    syncEntradaEvolucionChartHeight();
+    renderEntradaEvolucion();
+  });
+});
+
+$("#entradaEvolucionTableMoreButton")?.addEventListener("click",event=>{
+  event.stopPropagation();
+  const menu=$("#entradaEvolucionTableMenu");
+  setEntradaEvolucionTableMenuOpen(Boolean(menu?.hidden));
+});
+$("#exportEntradaEvolucionTableExcel")?.addEventListener("click",event=>{
+  event.stopPropagation();
+  exportEntradaEvolucionTableToExcel();
+});
+document.addEventListener("click",event=>{
+  if(!event.target.closest("#entradaEvolucionTableMore"))setEntradaEvolucionTableMenuOpen(false);
+});
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape")setEntradaEvolucionTableMenuOpen(false);
 });
 
 
