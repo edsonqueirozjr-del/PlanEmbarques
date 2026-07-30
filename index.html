@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plan de Embarques</title>
+  <!-- v23: zoom de 4 meses automático en diaria y acumulada; período eliminado del filtro de importación -->
+<title>Plan de Embarques</title>
   <style>
     :root{
       --green:#003d22;
@@ -12700,49 +12701,7 @@
             <button class="entrada-evolucion-mode-button" type="button" data-entrada-import-mode="diaria" aria-pressed="false">Diaria</button>
           </div>
         </div>
-        <div class="entrada-import-filter-field entrada-import-filter-period">
-          <strong>Período</strong>
-          <div class="entrada-import-filter-period-months" id="entradaImportFilterPeriodMonths">
-            <div class="entrada-import-filter-period-slider">
-              <div class="entrada-import-filter-period-track">
-                <div class="entrada-import-filter-period-values">
-                  <span id="entradaImportFilterMonthFromLabel">—</span>
-                  <span id="entradaImportFilterMonthToLabel">—</span>
-                </div>
-                <span class="entrada-import-filter-period-selection" id="entradaImportFilterMonthSelection"></span>
-                <input type="range" id="entradaImportFilterMonthFrom" min="0" max="11" step="1" value="0" aria-label="Mes inicial">
-                <input type="range" id="entradaImportFilterMonthTo" min="0" max="11" step="1" value="11" aria-label="Mes final">
-              </div>
-            </div>
-          </div>
-          <div class="entrada-import-filter-period-fields" id="entradaImportFilterPeriodDates" hidden>
-            <div class="entrada-date-no-year-field entrada-month-day-field">
-              <input type="hidden" id="entradaImportFilterDateFrom" aria-label="Desde">
-              <button class="entrada-month-day-trigger" type="button" data-month-day-for="entradaImportFilterDateFrom" aria-label="Seleccionar día y mes inicial" aria-haspopup="dialog" aria-expanded="false">
-                <span class="entrada-date-no-year-value" data-date-display-for="entradaImportFilterDateFrom">—</span>
-                <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
-              </button>
-            </div>
-            <div class="entrada-date-no-year-field entrada-month-day-field">
-              <input type="hidden" id="entradaImportFilterDateTo" aria-label="Hasta">
-              <button class="entrada-month-day-trigger" type="button" data-month-day-for="entradaImportFilterDateTo" aria-label="Seleccionar día y mes final" aria-haspopup="dialog" aria-expanded="false">
-                <span class="entrada-date-no-year-value" data-date-display-for="entradaImportFilterDateTo">—</span>
-                <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
-              </button>
-            </div>
-          </div>
-          <div class="entrada-import-filter-day-control" id="entradaImportFilterDaySlider" aria-label="Ajustar período arrastrando" hidden>
-            <span class="entrada-import-filter-day-month" id="entradaImportFilterDayFromLabel">—</span>
-            <div class="entrada-import-filter-period-slider">
-              <div class="entrada-import-filter-period-track" id="entradaImportFilterPeriodTrack">
-                <span class="entrada-import-filter-period-selection" id="entradaImportFilterPeriodSelection"></span>
-                <input type="range" id="entradaImportFilterRangeFrom" min="0" max="1" step="1" value="0" aria-label="Fecha inicial">
-                <input type="range" id="entradaImportFilterRangeTo" min="0" max="1" step="1" value="1" aria-label="Fecha final">
-              </div>
-            </div>
-            <span class="entrada-import-filter-day-month" id="entradaImportFilterDayToLabel">—</span>
-          </div>
-        </div>
+        
       </div>
       <div class="entrada-import-filter-actions">
         <button class="btn btn-primary" id="entradaImportFilterApply" type="button">Abrir Evolución</button>
@@ -17474,6 +17433,9 @@ let entradaEvolucionZoomTotalMonths=0;
 let entradaEvolucionZoomSignature="";
 let entradaEvolucionZoomBaseDateFrom="";
 let entradaEvolucionZoomBaseDateTo="";
+let entradaEvolucionZoomBaseMonthFrom=0;
+let entradaEvolucionZoomBaseMonthTo=11;
+let entradaEvolucionAccumulatedPeriodManual=false;
 const ENTRADA_EVOLUCION_ZOOM_DEFAULT_MONTHS=4;
 const ENTRADA_EVOLUCION_ZOOM_MIN_MONTHS=2;
 let selectedEntradaEvolucionSilos=new Set();
@@ -17515,6 +17477,9 @@ function restoreEntradaEvolucionFilters(projects){
   if(dateTo&&/^\d{4}-\d{2}-\d{2}$/.test(String(saved.dateTo||"")))dateTo.value=saved.dateTo;
   entradaEvolucionZoomBaseDateFrom=/^\d{4}-\d{2}-\d{2}$/.test(String(saved.zoomBaseDateFrom||""))?saved.zoomBaseDateFrom:(dateFrom?.value||"");
   entradaEvolucionZoomBaseDateTo=/^\d{4}-\d{2}-\d{2}$/.test(String(saved.zoomBaseDateTo||""))?saved.zoomBaseDateTo:(dateTo?.value||"");
+  entradaEvolucionZoomBaseMonthFrom=Number.isInteger(Number(saved.zoomBaseMonthFrom))?Math.max(0,Math.min(11,Number(saved.zoomBaseMonthFrom))):Math.max(0,Math.min(11,Number(fromRange?.value??0)));
+  entradaEvolucionZoomBaseMonthTo=Number.isInteger(Number(saved.zoomBaseMonthTo))?Math.max(entradaEvolucionZoomBaseMonthFrom,Math.min(11,Number(saved.zoomBaseMonthTo))):Math.max(entradaEvolucionZoomBaseMonthFrom,Math.min(11,Number(toRange?.value??11)));
+  entradaEvolucionAccumulatedPeriodManual=Boolean(saved.accumulatedPeriodManual);
   syncEntradaEvolucionPeriodSlider();
   syncEntradaEvolucionPeriodMode();
 }
@@ -17530,8 +17495,11 @@ function saveEntradaEvolucionFilters(){
       dateTo:String($("#entradaEvolucionDateTo")?.value||""),
       zoomBaseDateFrom:String(entradaEvolucionZoomBaseDateFrom||$("#entradaEvolucionDateFrom")?.value||""),
       zoomBaseDateTo:String(entradaEvolucionZoomBaseDateTo||$("#entradaEvolucionDateTo")?.value||""),
+      zoomBaseMonthFrom:Number(entradaEvolucionZoomBaseMonthFrom),
+      zoomBaseMonthTo:Number(entradaEvolucionZoomBaseMonthTo),
       mode:entradaEvolucionMode,
       dailyPeriodManual:entradaEvolucionDailyPeriodManual,
+      accumulatedPeriodManual:entradaEvolucionAccumulatedPeriodManual,
       showPoints:entradaEvolucionShowPoints,
       thinLine:entradaEvolucionThinLine
     }));
@@ -17830,6 +17798,13 @@ function syncEntradaEvolucionPeriodToSelectedProjects(){
     fromRange.step=toRange.step="1";
     fromRange.value=String(from);
     toRange.value=String(Math.max(from,to));
+    const nextBaseFrom=from;
+    const nextBaseTo=Math.max(from,to);
+    if(nextBaseFrom!==entradaEvolucionZoomBaseMonthFrom||nextBaseTo!==entradaEvolucionZoomBaseMonthTo){
+      entradaEvolucionZoomBaseMonthFrom=nextBaseFrom;
+      entradaEvolucionZoomBaseMonthTo=nextBaseTo;
+      entradaEvolucionZoomSignature="";
+    }
     syncEntradaEvolucionPeriodSlider();
   }
   const dateFrom=$("#entradaEvolucionDateFrom");
@@ -18070,8 +18045,12 @@ function renderEntradaEvolucion(){
   const dateToRaw=entradaEvolucionMode==="diaria"
     ?(entradaEvolucionZoomBaseDateTo||$("#entradaEvolucionDateTo")?.value||"")
     :($("#entradaEvolucionDateTo")?.value||"");
-  const monthFrom=Math.max(0,Math.min(11,Number($("#entradaEvolucionMonthFrom")?.value??0)));
-  const monthTo=Math.max(monthFrom,Math.min(11,Number($("#entradaEvolucionMonthTo")?.value??11)));
+  const monthFrom=entradaEvolucionMode==="acumulada"
+    ?Math.max(0,Math.min(11,Number(entradaEvolucionZoomBaseMonthFrom)))
+    :Math.max(0,Math.min(11,Number($("#entradaEvolucionMonthFrom")?.value??0)));
+  const monthTo=entradaEvolucionMode==="acumulada"
+    ?Math.max(monthFrom,Math.min(11,Number(entradaEvolucionZoomBaseMonthTo)))
+    :Math.max(monthFrom,Math.min(11,Number($("#entradaEvolucionMonthTo")?.value??11)));
   const dateMatches=item=>{
     const itemDate=String(item.date||"");
     if(entradaEvolucionMode==="acumulada"){
@@ -18206,18 +18185,28 @@ function syncEntradaEvolucionZoomVisiblePeriod(monthGroups,calendarDates){
   if(to)to.value=toValue;
   syncEntradaPeriodDateDisplays();
 }
+function syncEntradaEvolucionZoomVisibleAccumulatedPeriod(monthGroups){
+  if(entradaEvolucionMode!=="acumulada"||!monthGroups?.length)return;
+  const firstMonth=Math.max(0,Math.min(11,Number(monthGroups[0]?.monthIndex)));
+  const lastMonth=Math.max(firstMonth,Math.min(11,Number(monthGroups[monthGroups.length-1]?.monthIndex)));
+  const from=$("#entradaEvolucionMonthFrom");
+  const to=$("#entradaEvolucionMonthTo");
+  if(from)from.value=String(firstMonth);
+  if(to)to.value=String(lastMonth);
+  syncEntradaEvolucionPeriodSlider();
+}
 function syncEntradaEvolucionMonthZoomControls(){
   const controls=$("#entradaEvolucionMonthZoom");
   const zoomIn=$("#entradaEvolucionZoomIn");
   const zoomOut=$("#entradaEvolucionZoomOut");
-  const isDaily=entradaEvolucionMode==="diaria";
-  if(controls)controls.hidden=!isDaily;
+  const zoomEnabled=entradaEvolucionMode==="diaria"||entradaEvolucionMode==="acumulada";
+  if(controls)controls.hidden=!zoomEnabled;
   const minimum=Math.min(ENTRADA_EVOLUCION_ZOOM_MIN_MONTHS,Math.max(1,entradaEvolucionZoomTotalMonths));
-  if(zoomIn)zoomIn.disabled=!isDaily||entradaEvolucionZoomTotalMonths<=entradaEvolucionZoomMonthCount;
-  if(zoomOut)zoomOut.disabled=!isDaily||entradaEvolucionZoomMonthCount<=minimum;
+  if(zoomIn)zoomIn.disabled=!zoomEnabled||entradaEvolucionZoomTotalMonths<=entradaEvolucionZoomMonthCount;
+  if(zoomOut)zoomOut.disabled=!zoomEnabled||entradaEvolucionZoomMonthCount<=minimum;
 }
 function changeEntradaEvolucionMonthZoom(step){
-  if(entradaEvolucionMode!=="diaria"||!entradaEvolucionZoomTotalMonths)return;
+  if(!entradaEvolucionZoomTotalMonths)return;
   const oldCount=Math.max(1,Math.min(entradaEvolucionZoomMonthCount,entradaEvolucionZoomTotalMonths));
   const minimum=Math.min(ENTRADA_EVOLUCION_ZOOM_MIN_MONTHS,entradaEvolucionZoomTotalMonths);
   const nextCount=Math.max(minimum,Math.min(entradaEvolucionZoomTotalMonths,oldCount+step));
@@ -18246,33 +18235,34 @@ function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
   const width=Math.max(1320,Math.round(height*renderedRatio));
   const left=90,right=Math.max(60,Math.round(width*.10)-left),top=26,bottom=38;
   const chartWidth=width-left-right,chartHeight=height-top-bottom;
-  const selectedMonthFrom=Math.max(0,Math.min(11,Number($("#entradaEvolucionMonthFrom")?.value??0)));
-  const selectedMonthTo=Math.max(selectedMonthFrom,Math.min(11,Number($("#entradaEvolucionMonthTo")?.value??11)));
-  const dateInsideSelectedPeriod=date=>{
-    if(entradaEvolucionMode!=="acumulada")return true;
-    const match=String(date||"").match(/^(\d{2})-(\d{2})$/);
-    if(!match)return false;
-    const month=Number(match[1])-1;
-    return month>=selectedMonthFrom&&month<=selectedMonthTo;
-  };
-  const visibleDaily=daily.filter(([date])=>dateInsideSelectedPeriod(date));
-  const visibleCompareDaily=compareDaily.filter(([date])=>dateInsideSelectedPeriod(date));
+  let selectedMonthFrom=Math.max(0,Math.min(11,Number($("#entradaEvolucionMonthFrom")?.value??0)));
+  let selectedMonthTo=Math.max(selectedMonthFrom,Math.min(11,Number($("#entradaEvolucionMonthTo")?.value??11)));
+  const visibleDaily=daily;
+  const visibleCompareDaily=compareDaily;
   const dailyCalendar=entradaEvolucionMode!=="acumulada";
-  const buildDailyFilterCalendar=()=>{
-    if(!dailyCalendar)return [];
-    const fromISO=String(entradaEvolucionZoomBaseDateFrom||$("#entradaEvolucionDateFrom")?.value||"");
-    const toISO=String(entradaEvolucionZoomBaseDateTo||$("#entradaEvolucionDateTo")?.value||"");
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(fromISO)||!/^\d{4}-\d{2}-\d{2}$/.test(toISO))return [];
-    const fromMonthDay=fromISO.slice(5);
-    const toMonthDay=toISO.slice(5);
-    const [fromMonth,fromDay]=fromMonthDay.split("-").map(Number);
-    const [toMonth,toDay]=toMonthDay.split("-").map(Number);
-    if(!fromMonth||!fromDay||!toMonth||!toDay)return [];
-    const baseYear=2000;
-    const start=new Date(Date.UTC(baseYear,fromMonth-1,fromDay));
-    let end=new Date(Date.UTC(baseYear,toMonth-1,toDay));
-    if(end<start)end=new Date(Date.UTC(baseYear+1,toMonth-1,toDay));
-    if(Number.isNaN(start.getTime())||Number.isNaN(end.getTime()))return [];
+  const buildZoomFilterCalendar=()=>{
+    let start;
+    let end;
+    if(entradaEvolucionMode==="acumulada"){
+      const fromMonth=Math.max(0,Math.min(11,Number(entradaEvolucionZoomBaseMonthFrom)));
+      const toMonth=Math.max(fromMonth,Math.min(11,Number(entradaEvolucionZoomBaseMonthTo)));
+      start=new Date(Date.UTC(2000,fromMonth,1));
+      end=new Date(Date.UTC(2000,toMonth+1,0));
+    }else{
+      const fromISO=String(entradaEvolucionZoomBaseDateFrom||$("#entradaEvolucionDateFrom")?.value||"");
+      const toISO=String(entradaEvolucionZoomBaseDateTo||$("#entradaEvolucionDateTo")?.value||"");
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(fromISO)||!/^\d{4}-\d{2}-\d{2}$/.test(toISO))return [];
+      const fromMonthDay=fromISO.slice(5);
+      const toMonthDay=toISO.slice(5);
+      const [fromMonth,fromDay]=fromMonthDay.split("-").map(Number);
+      const [toMonth,toDay]=toMonthDay.split("-").map(Number);
+      if(!fromMonth||!fromDay||!toMonth||!toDay)return [];
+      const baseYear=2000;
+      start=new Date(Date.UTC(baseYear,fromMonth-1,fromDay));
+      end=new Date(Date.UTC(baseYear,toMonth-1,toDay));
+      if(end<start)end=new Date(Date.UTC(baseYear+1,toMonth-1,toDay));
+    }
+    if(Number.isNaN(start?.getTime())||Number.isNaN(end?.getTime()))return [];
     const dates=[];
     const cursor=new Date(start);
     const maxDays=370;
@@ -18282,7 +18272,7 @@ function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
     }
     return dates;
   };
-  const filterCalendarDates=buildDailyFilterCalendar();
+  const filterCalendarDates=buildZoomFilterCalendar();
   const dataDates=[...new Set([...visibleDaily.map(([date])=>date),...visibleCompareDaily.map(([date])=>date)])]
     .sort((a,b)=>{
       const serial=value=>{
@@ -18312,11 +18302,12 @@ function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
     }
     group.total=total;
   });
-  if(dailyCalendar){
+  if(fullMonthGroups.length){
     entradaEvolucionZoomTotalMonths=fullMonthGroups.length;
     const zoomSignature=[
-      String(entradaEvolucionZoomBaseDateFrom||$("#entradaEvolucionDateFrom")?.value||""),
-      String(entradaEvolucionZoomBaseDateTo||$("#entradaEvolucionDateTo")?.value||""),
+      entradaEvolucionMode,
+      entradaEvolucionMode==="acumulada"?String(entradaEvolucionZoomBaseMonthFrom):String(entradaEvolucionZoomBaseDateFrom||$("#entradaEvolucionDateFrom")?.value||""),
+      entradaEvolucionMode==="acumulada"?String(entradaEvolucionZoomBaseMonthTo):String(entradaEvolucionZoomBaseDateTo||$("#entradaEvolucionDateTo")?.value||""),
       activeEntradaEvolucionProject,
       compareEntradaEvolucionProject,
       [...selectedEntradaEvolucionSilos].sort().join("|") ,
@@ -18324,15 +18315,20 @@ function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
     ].join("::");
     if(zoomSignature!==entradaEvolucionZoomSignature){
       entradaEvolucionZoomSignature=zoomSignature;
-      entradaEvolucionZoomMonthCount=Math.min(ENTRADA_EVOLUCION_ZOOM_DEFAULT_MONTHS,Math.max(1,fullMonthGroups.length));
+      const showFullManualAccumulated=entradaEvolucionMode==="acumulada"&&entradaEvolucionAccumulatedPeriodManual;
+      entradaEvolucionZoomMonthCount=showFullManualAccumulated
+        ?Math.max(1,fullMonthGroups.length)
+        :Math.min(ENTRADA_EVOLUCION_ZOOM_DEFAULT_MONTHS,Math.max(1,fullMonthGroups.length));
       let bestStart=0;
       let bestTotal=-1;
       const windowSize=entradaEvolucionZoomMonthCount;
-      for(let start=0;start<=Math.max(0,fullMonthGroups.length-windowSize);start++){
-        const total=fullMonthGroups.slice(start,start+windowSize).reduce((sum,group)=>sum+Number(group.total||0),0);
-        if(total>bestTotal){
-          bestTotal=total;
-          bestStart=start;
+      if(!showFullManualAccumulated){
+        for(let start=0;start<=Math.max(0,fullMonthGroups.length-windowSize);start++){
+          const total=fullMonthGroups.slice(start,start+windowSize).reduce((sum,group)=>sum+Number(group.total||0),0);
+          if(total>bestTotal){
+            bestTotal=total;
+            bestStart=start;
+          }
         }
       }
       entradaEvolucionZoomStartMonth=bestStart;
@@ -18342,16 +18338,23 @@ function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
   }else{
     entradaEvolucionZoomTotalMonths=0;
   }
-  const activeMonthGroups=dailyCalendar
-    ?fullMonthGroups.slice(entradaEvolucionZoomStartMonth,entradaEvolucionZoomStartMonth+entradaEvolucionZoomMonthCount)
-    :fullMonthGroups;
+  const activeMonthGroups=fullMonthGroups.slice(entradaEvolucionZoomStartMonth,entradaEvolucionZoomStartMonth+entradaEvolucionZoomMonthCount);
   const zoomFirstGroup=activeMonthGroups[0];
   const zoomLastGroup=activeMonthGroups[activeMonthGroups.length-1];
-  const allDates=dailyCalendar&&zoomFirstGroup&&zoomLastGroup
+  const allDates=zoomFirstGroup&&zoomLastGroup
     ?fullCalendarDates.slice(zoomFirstGroup.startIndex,zoomLastGroup.endIndex+1)
     :fullCalendarDates;
-  if(dailyCalendar)syncEntradaEvolucionZoomVisiblePeriod(activeMonthGroups,fullCalendarDates);
+  if(dailyCalendar){
+    syncEntradaEvolucionZoomVisiblePeriod(activeMonthGroups,fullCalendarDates);
+  }else if(zoomFirstGroup&&zoomLastGroup){
+    selectedMonthFrom=zoomFirstGroup.monthIndex;
+    selectedMonthTo=zoomLastGroup.monthIndex;
+    syncEntradaEvolucionZoomVisibleAccumulatedPeriod(activeMonthGroups);
+  }
   syncEntradaEvolucionMonthZoomControls();
+  const activeDateSet=new Set(allDates);
+  const activeVisibleDaily=visibleDaily.filter(([date])=>activeDateSet.has(date));
+  const activeVisibleCompareDaily=visibleCompareDaily.filter(([date])=>activeDateSet.has(date));
   const chartValue=value=>truckSimulation.showTrucks?trucksFromKg(value):Number(value||0);
   let firstRunning=0,secondRunning=0;
   const firstRawSeries=allDates.map(date=>{
@@ -18421,9 +18424,9 @@ function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
     const faded=series.slice(lastRealIndex).map(([,value],index)=>`${xAt(lastRealIndex+index)},${yAt(value)}`).join(" ");
     return {solid,faded};
   };
-  const firstLineSegments=splitSeriesLine(firstSeries,seriesLastRealIndex(visibleDaily));
+  const firstLineSegments=splitSeriesLine(firstSeries,seriesLastRealIndex(activeVisibleDaily));
   const secondLineSegments=compareEntradaEvolucionProject
-    ?splitSeriesLine(secondSeries,seriesLastRealIndex(visibleCompareDaily))
+    ?splitSeriesLine(secondSeries,seriesLastRealIndex(activeVisibleCompareDaily))
     :{solid:comparePoints,faded:""};
   const formatAxisValue=value=>{
     if(truckSimulation.showTrucks)return formatTruckCount(value);
@@ -18518,8 +18521,8 @@ function renderEntradaEvolucionChart(daily,compareDaily=[],period={}){
   }).join(""):"";
   const endLabels=[];
   const endGuides=[];
-  const firstAccumulatedTotal=chartValue(visibleDaily.reduce((sum,[,value])=>sum+Number(value||0),0));
-  const secondAccumulatedTotal=chartValue(visibleCompareDaily.reduce((sum,[,value])=>sum+Number(value||0),0));
+  const firstAccumulatedTotal=chartValue(activeVisibleDaily.reduce((sum,[,value])=>sum+Number(value||0),0));
+  const secondAccumulatedTotal=chartValue(activeVisibleCompareDaily.reduce((sum,[,value])=>sum+Number(value||0),0));
   const endLabelLayout=(className,date,value,total,targetY=yAt(value))=>{
     const label=`${className==="primary"?activeEntradaEvolucionProject:compareEntradaEvolucionProject} — ${formatChartValue(total)}`;
     const naturalX=xAtDate(date)+10;
@@ -18878,18 +18881,6 @@ function openEntradaImportFilters(){
       compareSelect.value=eligibleCompareProjects.includes(previousCompare)&&previousCompare!==project?previousCompare:"";
     }
     const chosenProjects=new Set([project,String(compareSelect?.value||"")].filter(Boolean));
-    const periodRange=entradaEvolucionPeriodRangeForProjects(project,String(compareSelect?.value||""));
-    const chosenMonths=periodRange.selectedDates.map(date=>Number(date.slice(5,7))-1).filter(month=>month>=0&&month<=11);
-    const monthFrom=$("#entradaImportFilterMonthFrom");
-    const monthTo=$("#entradaImportFilterMonthTo");
-    if(monthFrom)monthFrom.value=String(chosenMonths.length?Math.min(...chosenMonths):0);
-    if(monthTo)monthTo.value=String(chosenMonths.length?Math.max(...chosenMonths):11);
-    syncEntradaImportMonthSelection();
-    const dateFrom=$("#entradaImportFilterDateFrom");
-    const dateTo=$("#entradaImportFilterDateTo");
-    if(dateFrom)dateFrom.value=periodRange.firstDate||"";
-    if(dateTo)dateTo.value=periodRange.lastDate||"";
-    configureEntradaImportPeriodSlider(periodRange.firstDate&&periodRange.lastDate?[periodRange.firstDate,periodRange.lastDate]:periodRange.selectedDates);
     const silos=[...new Set((db.entradaEvolucion||[])
       .filter(item=>chosenProjects.has(String(item.project||"")))
       .map(item=>String(item.silo||"").trim()).filter(Boolean))]
@@ -23143,10 +23134,12 @@ $("#entradaEvolucionModeToggle")?.addEventListener("click",event=>{
   if(nextMode===entradaEvolucionMode)return;
   entradaEvolucionMode=nextMode;
   applyEntradaEvolucionModeVisualDefaults();
-  if(nextMode==="diaria"){
-    entradaEvolucionDailyPeriodManual=false;
-    syncEntradaEvolucionPeriodToSelectedProjects();
-  }
+  entradaEvolucionZoomMonthCount=ENTRADA_EVOLUCION_ZOOM_DEFAULT_MONTHS;
+  entradaEvolucionZoomStartMonth=0;
+  entradaEvolucionZoomSignature="";
+  if(nextMode==="diaria")entradaEvolucionDailyPeriodManual=false;
+  if(nextMode==="acumulada")entradaEvolucionAccumulatedPeriodManual=false;
+  syncEntradaEvolucionPeriodToSelectedProjects();
   syncEntradaEvolucionPeriodMode();
   saveEntradaEvolucionFilters();
   renderEntradaEvolucion();
@@ -23389,22 +23382,13 @@ $("#entradaImportFilterApply")?.addEventListener("click",()=>{
   selectedEntradaEvolucionSilos=new Set(selectedEntradaImportSilos);
   entradaEvolucionMode=entradaImportMode;
   applyEntradaEvolucionModeVisualDefaults();
-  const monthFrom=$("#entradaEvolucionMonthFrom");
-  const monthTo=$("#entradaEvolucionMonthTo");
-  if(monthFrom)monthFrom.value=String($("#entradaImportFilterMonthFrom")?.value||"0");
-  if(monthTo)monthTo.value=String($("#entradaImportFilterMonthTo")?.value||"11");
-  const dateFrom=$("#entradaEvolucionDateFrom");
-  const dateTo=$("#entradaEvolucionDateTo");
-  const importedDateFrom=String($("#entradaImportFilterDateFrom")?.value||"");
-  const importedDateTo=String($("#entradaImportFilterDateTo")?.value||"");
-  if(dateFrom)dateFrom.value=importedDateFrom;
-  if(dateTo)dateTo.value=importedDateTo;
+  entradaEvolucionDailyPeriodManual=false;
+  entradaEvolucionAccumulatedPeriodManual=false;
+  entradaEvolucionZoomMonthCount=ENTRADA_EVOLUCION_ZOOM_DEFAULT_MONTHS;
+  entradaEvolucionZoomStartMonth=0;
+  entradaEvolucionZoomSignature="";
+  syncEntradaEvolucionPeriodToSelectedProjects();
   syncEntradaEvolucionPeriodControls();
-  const automaticDailyRange=entradaEvolucionPeriodRangeForProjects(activeEntradaEvolucionProject,compareEntradaEvolucionProject);
-  entradaEvolucionDailyPeriodManual=entradaEvolucionMode==="diaria"&&Boolean(
-    importedDateFrom&&importedDateTo&&
-    (importedDateFrom!==automaticDailyRange.firstDate||importedDateTo!==automaticDailyRange.lastDate)
-  );
   saveEntradaEvolucionFilters();
   closeEntradaImportProgress();
   showView("entrada-evolucion");
@@ -23421,9 +23405,6 @@ $("#entradaImportModeToggle")?.addEventListener("click",event=>{
   const button=event.target.closest("[data-entrada-import-mode]");
   if(!button)return;
   entradaImportMode=button.dataset.entradaImportMode==="diaria"?"diaria":"acumulada";
-  if(entradaImportMode==="diaria"){
-    $("#entradaImportFilterProject")?.onchange?.();
-  }
   syncEntradaImportMode();
 });
 ["entradaImportFilterMonthFrom","entradaImportFilterMonthTo"].forEach(id=>{
@@ -23477,6 +23458,10 @@ $("#entradaEvolucionProject")?.addEventListener("change",event=>{
   if(compareEntradaEvolucionProject===activeEntradaEvolucionProject)compareEntradaEvolucionProject="";
   selectedEntradaEvolucionSilos.clear();
   entradaEvolucionDailyPeriodManual=false;
+  entradaEvolucionAccumulatedPeriodManual=false;
+  entradaEvolucionZoomMonthCount=ENTRADA_EVOLUCION_ZOOM_DEFAULT_MONTHS;
+  entradaEvolucionZoomStartMonth=0;
+  entradaEvolucionZoomSignature="";
   if(activeEntradaEvolucionProject)syncEntradaEvolucionPeriodToSelectedProjects();
   saveEntradaEvolucionFilters();
   renderEntradaEvolucion();
@@ -23530,17 +23515,21 @@ $("#entradaEvolucionCompareProject")?.addEventListener("change",event=>{
   compareEntradaEvolucionProject=String(event.target.value||"");
   selectedEntradaEvolucionSilos.clear();
   entradaEvolucionDailyPeriodManual=false;
+  entradaEvolucionAccumulatedPeriodManual=false;
+  entradaEvolucionZoomMonthCount=ENTRADA_EVOLUCION_ZOOM_DEFAULT_MONTHS;
+  entradaEvolucionZoomStartMonth=0;
+  entradaEvolucionZoomSignature="";
   if(activeEntradaEvolucionProject)syncEntradaEvolucionPeriodToSelectedProjects();
   saveEntradaEvolucionFilters();
   renderEntradaEvolucion();
 });
 ["entradaEvolucionDateFrom","entradaEvolucionDateTo"].forEach(id=>{
-  $(`#${id}`)?.addEventListener("input",()=>{
-    syncEntradaPeriodDateDisplays();
-    if(entradaEvolucionMode==="diaria")entradaEvolucionDailyPeriodManual=true;
-    saveEntradaEvolucionFilters();
-    renderEntradaEvolucion();
-  });
+  /* El selector personalizado emite primero input y después change.
+     En input solo actualizamos el texto visible. La actualización del
+     período-base, el reinicio del zoom y el render se realizan en el
+     listener change principal, evitando que un render intermedio vuelva
+     a escribir el período visible anterior antes de confirmar la fecha. */
+  $(`#${id}`)?.addEventListener("input",syncEntradaPeriodDateDisplays);
   $(`#${id}`)?.addEventListener("change",syncEntradaPeriodDateDisplays);
 });
 let entradaEvolucionPeriodRenderFrame=0;
@@ -23548,6 +23537,16 @@ function queueEntradaEvolucionPeriodRender(){
   cancelAnimationFrame(entradaEvolucionPeriodRenderFrame);
   entradaEvolucionPeriodRenderFrame=requestAnimationFrame(()=>{
     syncEntradaEvolucionPeriodSlider();
+    if(entradaEvolucionMode==="acumulada"){
+      const from=Math.max(0,Math.min(11,Number($("#entradaEvolucionMonthFrom")?.value??0)));
+      const to=Math.max(from,Math.min(11,Number($("#entradaEvolucionMonthTo")?.value??11)));
+      entradaEvolucionZoomBaseMonthFrom=from;
+      entradaEvolucionZoomBaseMonthTo=to;
+      entradaEvolucionAccumulatedPeriodManual=true;
+      entradaEvolucionZoomMonthCount=Math.max(1,to-from+1);
+      entradaEvolucionZoomStartMonth=0;
+      entradaEvolucionZoomSignature="";
+    }
     saveEntradaEvolucionFilters();
     renderEntradaEvolucion();
   });
