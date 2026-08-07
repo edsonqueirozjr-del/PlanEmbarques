@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="plan-build" content="2.0.200-firebase-migration" />
+    <meta name="plan-build" content="2.0.201-entrada-xlsx-robusto" />
 
     <title>Plan de Embarques · v2.0.200</title>
     <style>
@@ -11940,6 +11940,7 @@ table [data-column-key="longitude"] .registry-sort-button {
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.3/umd/index.js"></script>
   </head>
   <body>
     <script>
@@ -17315,30 +17316,62 @@ function xlsxParseZip(buffer) {
 
 async function xlsxInflateRaw(chunk) {
   /*
-   * Usa o pipeline nativo completo em vez de escrever manualmente no
-   * DecompressionStream. Em arquivos de Entrada grandes, uma única entrada
-   * XML pode ter vários MB comprimidos e dezenas de MB descomprimidos; o
-   * pipeline evita pressão desnecessária de memória/backpressure no writer.
+   * XLSX usa DEFLATE bruto dentro do ZIP. O caminho principal usa fflate,
+   * carregado no <head>, porque evita depender do suporte específico do
+   * navegador a DecompressionStream("deflate-raw"). Mantemos o caminho
+   * nativo como fallback para que a importação continue disponível caso o
+   * CDN não esteja acessível e o navegador suporte o formato.
    */
-  const stream = new Blob([chunk])
-    .stream()
-    .pipeThrough(new DecompressionStream("deflate-raw"));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
+  const source = chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk || 0);
+  if (!source.byteLength) return new Uint8Array();
+
+  const fflateApi = globalThis.fflate;
+  if (fflateApi && typeof fflateApi.inflateSync === "function") {
+    try {
+      return fflateApi.inflateSync(source);
+    } catch (error) {
+      const wrapped = new Error(`FFLATE_INFLATE_FAILED: ${error?.message || error}`);
+      wrapped.cause = error;
+      throw wrapped;
+    }
+  }
+
+  if (typeof DecompressionStream === "function") {
+    try {
+      const stream = new Blob([source])
+        .stream()
+        .pipeThrough(new DecompressionStream("deflate-raw"));
+      return new Uint8Array(await new Response(stream).arrayBuffer());
+    } catch (error) {
+      const wrapped = new Error(`NATIVE_INFLATE_FAILED: ${error?.message || error}`);
+      wrapped.cause = error;
+      throw wrapped;
+    }
+  }
+
+  throw new Error("XLSX_INFLATE_UNAVAILABLE");
 }
 
 async function xlsxReadEntryText(zip, name) {
   const entry = zip.entries[name];
   if (!entry) return null;
   const { view, bytes } = zip;
-  const lh = entry.localHeaderOffset;
+  const lh = Number(entry.localHeaderOffset || 0);
+  if (lh < 0 || lh + 30 > view.byteLength || view.getUint32(lh, true) !== 0x04034b50) {
+    throw new Error(`XLSX_LOCAL_HEADER_INVALID:${name}`);
+  }
   const nameLen = view.getUint16(lh + 26, true);
   const extraLen = view.getUint16(lh + 28, true);
   const dataStart = lh + 30 + nameLen + extraLen;
-  const raw = bytes.subarray(dataStart, dataStart + entry.compressedSize);
+  const dataEnd = dataStart + Number(entry.compressedSize || 0);
+  if (dataStart < 0 || dataEnd > bytes.byteLength || dataEnd < dataStart) {
+    throw new Error(`XLSX_ENTRY_RANGE_INVALID:${name}`);
+  }
+  const raw = bytes.subarray(dataStart, dataEnd);
   let plain;
   if (entry.compressionMethod === 8) plain = await xlsxInflateRaw(raw);
   else if (entry.compressionMethod === 0) plain = raw;
-  else throw new Error("Formato de compresión de .xlsx no soportado.");
+  else throw new Error(`XLSX_COMPRESSION_UNSUPPORTED:${entry.compressionMethod}`);
   return new TextDecoder("utf-8").decode(plain);
 }
 
@@ -17464,8 +17497,8 @@ function createImportFileValidationError(flow, code, options = {}) {
     message = `El archivo "${fileName}" no tiene el formato requerido para ${flowLabel}.`;
     guidance = "Seleccione un archivo Excel con extensión .xlsx.";
   } else if (code === "invalid-xlsx") {
-    message = `El archivo "${fileName}" no es un .xlsx válido o está dañado.`;
-    guidance = "Genere nuevamente el archivo Excel y vuelva a seleccionarlo.";
+    message = `No fue posible leer el archivo "${fileName}" como Excel.`;
+    guidance = "El archivo puede ser válido; la lectura o descompresión falló en el navegador. Recargue la página y vuelva a seleccionarlo.";
   } else if (code === "missing-sheet") {
     title = "Hoja de datos no encontrada";
     message = `El archivo "${fileName}" no contiene una hoja de cálculo válida.`;
@@ -17501,6 +17534,7 @@ function createImportFileValidationError(flow, code, options = {}) {
   error.guidance = guidance;
   error.detectedFlow = detectedFlow;
   error.missingColumns = missingColumns;
+  error.technicalDetail = String(options.technicalDetail || "").trim();
   return error;
 }
 
@@ -17508,6 +17542,7 @@ function normalizeImportFileValidationError(error, flow, file) {
   if (error?.name === "ImportFileValidationError") return error;
   return createImportFileValidationError(flow, "invalid-xlsx", {
     fileName: file?.name,
+    technicalDetail: error?.message || String(error || ""),
   });
 }
 
@@ -17518,12 +17553,16 @@ function showImportFileValidationError(error, flow = "salida", file = null) {
         .map((column) => `<li>${esc(column)}</li>`)
         .join("")}</ul></div>`
     : "";
+  const technicalMarkup = issue.technicalDetail
+    ? `<div class="import-validation-columns"><strong>Detalle técnico:</strong><div>${esc(issue.technicalDetail)}</div></div>`
+    : "";
   const body = `<div class="import-validation-alert" role="alert" aria-live="assertive">
     <div class="import-validation-icon" aria-hidden="true">!</div>
     <div class="import-validation-copy">
       <strong>${esc(issue.message)}</strong>
       <p>${esc(issue.guidance)}</p>
       ${missingMarkup}
+      ${technicalMarkup}
       <small>No se importó ningún dato. La información anterior fue preservada.</small>
     </div>
   </div>`;
@@ -17544,8 +17583,11 @@ async function readImportSpreadsheetRows(file, flow) {
   let buffer;
   try {
     buffer = await file.arrayBuffer();
-  } catch (_error) {
-    throw createImportFileValidationError(flow, "invalid-xlsx", { fileName });
+  } catch (error) {
+    throw createImportFileValidationError(flow, "invalid-xlsx", {
+      fileName,
+      technicalDetail: `FILE_READ_FAILED: ${error?.message || error}`,
+    });
   }
   if (!buffer?.byteLength) {
     throw createImportFileValidationError(flow, "empty-file", { fileName });
@@ -17553,8 +17595,11 @@ async function readImportSpreadsheetRows(file, flow) {
   let zip;
   try {
     zip = xlsxParseZip(buffer);
-  } catch (_error) {
-    throw createImportFileValidationError(flow, "invalid-xlsx", { fileName });
+  } catch (error) {
+    throw createImportFileValidationError(flow, "invalid-xlsx", {
+      fileName,
+      technicalDetail: `ZIP_PARSE_FAILED: ${error?.message || error}`,
+    });
   }
   const sheetPath = xlsxPickFirstSheetPath(zip);
   if (!sheetPath) {
@@ -17574,7 +17619,10 @@ async function readImportSpreadsheetRows(file, flow) {
     );
   } catch (error) {
     if (error?.name === "ImportFileValidationError") throw error;
-    throw createImportFileValidationError(flow, "invalid-xlsx", { fileName });
+    throw createImportFileValidationError(flow, "invalid-xlsx", {
+      fileName,
+      technicalDetail: `XLSX_CONTENT_READ_FAILED: ${error?.message || error}`,
+    });
   }
   if (!rows.length) {
     throw createImportFileValidationError(flow, "empty-file", { fileName });
