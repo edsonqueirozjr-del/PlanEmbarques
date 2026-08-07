@@ -17314,26 +17314,16 @@ function xlsxParseZip(buffer) {
 }
 
 async function xlsxInflateRaw(chunk) {
-  const stream = new DecompressionStream("deflate-raw");
-  const writer = stream.writable.getWriter();
-  writer.write(chunk);
-  writer.close();
-  const parts = [];
-  let total = 0;
-  const reader = stream.readable.getReader();
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    parts.push(value);
-    total += value.length;
-  }
-  const out = new Uint8Array(total);
-  let offset = 0;
-  parts.forEach((part) => {
-    out.set(part, offset);
-    offset += part.length;
-  });
-  return out;
+  /*
+   * Usa o pipeline nativo completo em vez de escrever manualmente no
+   * DecompressionStream. Em arquivos de Entrada grandes, uma única entrada
+   * XML pode ter vários MB comprimidos e dezenas de MB descomprimidos; o
+   * pipeline evita pressão desnecessária de memória/backpressure no writer.
+   */
+  const stream = new Blob([chunk])
+    .stream()
+    .pipeThrough(new DecompressionStream("deflate-raw"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
 async function xlsxReadEntryText(zip, name) {
@@ -17358,14 +17348,37 @@ function xlsxXmlElements(root, localName) {
   return [...root.getElementsByTagName(localName)];
 }
 
+function xlsxDecodeXmlText(value) {
+  return String(value || "")
+    .replace(/&#(\d+);/g, (_match, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_match, code) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
 function xlsxParseSharedStrings(xml) {
   if (!xml) return [];
-  const doc = new DOMParser().parseFromString(xml, "application/xml");
-  return xlsxXmlElements(doc, "si").map((si) =>
-    xlsxXmlElements(si, "t")
-      .map((t) => t.textContent)
-      .join(""),
-  );
+  /*
+   * Não monta um DOM gigante. Alguns relatórios de Entrada trazem milhares
+   * de linhas e o sharedStrings.xml pode ser grande. A leitura sequencial
+   * mantém o consumo de memória previsível e preserva rich text (<r><t>...).
+   */
+  const strings = [];
+  const itemPattern = /<si\b[^>]*>([\s\S]*?)<\/si>/gi;
+  let itemMatch;
+  while ((itemMatch = itemPattern.exec(xml))) {
+    const parts = [];
+    const textPattern = /<t\b[^>]*>([\s\S]*?)<\/t>/gi;
+    let textMatch;
+    while ((textMatch = textPattern.exec(itemMatch[1]))) {
+      parts.push(xlsxDecodeXmlText(textMatch[1]));
+    }
+    strings.push(parts.join(""));
+  }
+  return strings;
 }
 
 function xlsxColLettersToIndex(letters) {
@@ -17375,31 +17388,49 @@ function xlsxColLettersToIndex(letters) {
 }
 
 function xlsxParseSheetRows(xml, sharedStrings) {
-  const doc = new DOMParser().parseFromString(xml, "application/xml");
-  return xlsxXmlElements(doc, "row").map((rowEl) => {
+  /*
+   * Parser sequencial para planilhas grandes. O parser anterior criava um
+   * DOM completo do sheet1.xml e, depois, milhares de arrays de NodeList.
+   * Relatórios com ~15 mil linhas podem expandir para dezenas de MB em XML.
+   * Aqui extraímos somente as linhas/células necessárias sem materializar o
+   * documento XML inteiro como árvore DOM.
+   */
+  const rows = [];
+  const rowPattern = /<row\b[^>]*>([\s\S]*?)<\/row>/gi;
+  let rowMatch;
+  while ((rowMatch = rowPattern.exec(xml))) {
     const out = [];
-    xlsxXmlElements(rowEl, "c").forEach((c) => {
-      const ref = c.getAttribute("r") || "";
-      const colIdx = xlsxColLettersToIndex(ref.replace(/\d+/g, ""));
-      if (colIdx < 0) return;
-      const type = c.getAttribute("t");
+    const rowXml = rowMatch[1];
+    const cellPattern = /<c\b([^>]*?)(?:\/\s*>|>([\s\S]*?)<\/c>)/gi;
+    let cellMatch;
+    while ((cellMatch = cellPattern.exec(rowXml))) {
+      const attrs = cellMatch[1] || "";
+      const body = cellMatch[2] || "";
+      const refMatch = attrs.match(/(?:^|\s)r="([A-Z]+)\d+"/i);
+      if (!refMatch) continue;
+      const colIdx = xlsxColLettersToIndex(refMatch[1].toUpperCase());
+      if (colIdx < 0) continue;
+      const typeMatch = attrs.match(/(?:^|\s)t="([^"]+)"/i);
+      const type = typeMatch ? typeMatch[1] : "";
       let value = "";
       if (type === "inlineStr") {
-        const isEl = xlsxXmlElements(c, "is")[0];
-        value = isEl
-          ? xlsxXmlElements(isEl, "t")
-              .map((t) => t.textContent)
-              .join("")
-          : "";
+        const parts = [];
+        const textPattern = /<t\b[^>]*>([\s\S]*?)<\/t>/gi;
+        let textMatch;
+        while ((textMatch = textPattern.exec(body))) {
+          parts.push(xlsxDecodeXmlText(textMatch[1]));
+        }
+        value = parts.join("");
       } else {
-        const vEl = xlsxXmlElements(c, "v")[0];
-        const raw = vEl ? vEl.textContent : "";
+        const valueMatch = body.match(/<v\b[^>]*>([\s\S]*?)<\/v>/i);
+        const raw = valueMatch ? xlsxDecodeXmlText(valueMatch[1]) : "";
         value = type === "s" ? sharedStrings[Number(raw)] || "" : raw;
       }
       out[colIdx] = value;
-    });
-    return out;
-  });
+    }
+    rows.push(out);
+  }
+  return rows;
 }
 
 function xlsxPickFirstSheetPath(zip) {
