@@ -2582,6 +2582,51 @@ body.boot-restoring .login-screen {
   letter-spacing: 0.055em;
   color: #63736b;
 }
+
+.datos-sort-button {
+  width: 100%;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.datos-sort-button:hover,
+.datos-sort-button.is-active {
+  color: var(--cyan-dark);
+}
+
+.datos-sort-button:focus-visible {
+  outline: 2px solid rgba(0, 147, 171, 0.28);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.datos-sort-indicator {
+  order: -1;
+  flex: 0 0 auto;
+  min-width: 0;
+  color: var(--cyan-dark);
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+}
+
+.datos-sort-indicator:not(:empty) {
+  margin-right: 5px;
+}
 #view-datos .page-head {
   align-items: center;
 }
@@ -2630,14 +2675,11 @@ body.boot-restoring .login-screen {
   background: #eaf6f8;
   box-shadow: inset 4px 0 0 var(--cyan);
 }
-.datos-edit-row-btn,
-.datos-merge-status {
+.datos-edit-row-btn {
   display: grid;
   place-items: center;
   width: 30px;
   height: 30px;
-}
-.datos-edit-row-btn {
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -2648,13 +2690,38 @@ body.boot-restoring .login-screen {
   background: 0 0;
   color: var(--cyan);
 }
-.datos-edit-row-btn svg,
-.datos-merge-status svg {
+.datos-edit-row-btn svg {
   width: 18px;
   height: 18px;
 }
-.datos-merge-status {
-  color: #8a9299;
+.datos-record-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+}
+.datos-record-status-indicator {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 7px;
+}
+.datos-record-status-indicator svg {
+  width: 15px;
+  height: 15px;
+}
+.datos-record-status-indicator.is-name-edited {
+  color: var(--cyan-dark);
+  background: #eaf6f8;
+}
+.datos-record-status-indicator.is-merged {
+  color: var(--green);
+  background: #edf4ef;
 }
 .datos-section-head-actions {
   display: flex;
@@ -2711,6 +2778,99 @@ body.boot-restoring .login-screen {
 .datos-merge-btn:hover {
   background: var(--cyan-dark);
   border-color: var(--cyan-dark);
+}
+.datos-cancel-selection-btn {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #b8dfe5;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--cyan-dark);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.datos-cancel-selection-btn:hover:not(:disabled) {
+  background: #f1fafb;
+  border-color: var(--cyan);
+}
+.datos-cancel-selection-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.datos-open-table-btn {
+  height: 38px;
+  min-width: 76px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.16s ease;
+}
+.datos-open-table-btn:hover,
+.datos-open-table-btn.is-active {
+  border-color: #b8dfe5;
+  background: #f1fafb;
+  color: var(--cyan-dark);
+}
+.datos-open-table-btn svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  stroke-width: 1.8;
+}
+body.datos-table-expanded {
+  overflow: hidden;
+}
+.datos-section-shell.is-expanded {
+  position: fixed;
+  inset: 18px;
+  z-index: 190;
+  width: auto;
+  height: auto;
+  max-height: none;
+  overflow: hidden;
+  border-color: #cfe3e6;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow:
+    0 0 0 9999px rgba(5, 26, 16, 0.42),
+    0 24px 70px rgba(0, 61, 34, 0.22);
+}
+.datos-section-shell.is-expanded .datos-sticky-top {
+  flex: 0 0 auto;
+}
+.datos-section-shell.is-expanded .datos-grid-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.datos-section-shell.is-expanded .table-foot {
+  flex: 0 0 auto;
+}
+.datos-section-shell.is-expanded .datos-pagination {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  .datos-section-shell.is-expanded {
+    inset: 10px;
+  }
+  .datos-open-table-btn {
+    min-width: 68px;
+    padding: 0 9px;
+  }
 }
 .datos-merge-option {
   display: flex;
@@ -14214,6 +14374,30 @@ table [data-column-key="longitude"] .registry-sort-button {
                   >
                     Fusionar (<span id="datosMergeProductsCount">0</span>)
                   </button>
+                  <button
+                    type="button"
+                    class="datos-cancel-selection-btn"
+                    data-datos-cancel-selection="products"
+                    title="Cancelar selección"
+                    aria-label="Cancelar selección"
+                    hidden=""
+                    disabled
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="datos-open-table-btn"
+                    data-datos-open-table="products"
+                    title="Abrir tabla completa"
+                    aria-label="Abrir tabla completa de Commodity"
+                    aria-expanded="false"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 3H3v5"></path><path d="M16 3h5v5"></path><path d="M8 21H3v-5"></path><path d="M16 21h5v-5"></path>
+                    </svg>
+                    <span>Abrir</span>
+                  </button>
                   <label class="database-search">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <circle cx="11" cy="11" r="7"></circle>
@@ -14224,7 +14408,7 @@ table [data-column-key="longitude"] .registry-sort-button {
                 </div>
               </div>
               <div class="datos-grid-row datos-grid-header" style="grid-template-columns: 32px 110px 1fr 52px 38px">
-                <span></span><span>Código</span><span>Nombre</span><span></span><span></span>
+                <span></span><span>Código</span><span><button class="datos-sort-button" type="button" data-datos-sort="products:name" aria-label="Ordenar Nombre"><span class="datos-sort-indicator" aria-hidden="true"></span><span>Nombre</span></button></span><span title="Estado del registro">Estado</span><span></span>
               </div>
             </div>
             <div class="datos-grid-body" id="datosProductsTable"></div>
@@ -14245,6 +14429,30 @@ table [data-column-key="longitude"] .registry-sort-button {
                   >
                     Fusionar (<span id="datosMergePeriodsCount">0</span>)
                   </button>
+                  <button
+                    type="button"
+                    class="datos-cancel-selection-btn"
+                    data-datos-cancel-selection="periods"
+                    title="Cancelar selección"
+                    aria-label="Cancelar selección"
+                    hidden=""
+                    disabled
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="datos-open-table-btn"
+                    data-datos-open-table="periods"
+                    title="Abrir tabla completa"
+                    aria-label="Abrir tabla completa de Período"
+                    aria-expanded="false"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 3H3v5"></path><path d="M16 3h5v5"></path><path d="M8 21H3v-5"></path><path d="M16 21h5v-5"></path>
+                    </svg>
+                    <span>Abrir</span>
+                  </button>
                   <label class="database-search">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <circle cx="11" cy="11" r="7"></circle>
@@ -14255,7 +14463,7 @@ table [data-column-key="longitude"] .registry-sort-button {
                 </div>
               </div>
               <div class="datos-grid-row datos-grid-header" style="grid-template-columns: 32px 110px 1fr 52px 38px">
-                <span></span><span>Código</span><span>Nombre</span><span></span><span></span>
+                <span></span><span>Código</span><span><button class="datos-sort-button" type="button" data-datos-sort="periods:name" aria-label="Ordenar Nombre"><span class="datos-sort-indicator" aria-hidden="true"></span><span>Nombre</span></button></span><span title="Estado del registro">Estado</span><span></span>
               </div>
             </div>
             <div class="datos-grid-body" id="datosPeriodsTable"></div>
@@ -14276,6 +14484,30 @@ table [data-column-key="longitude"] .registry-sort-button {
                   >
                     Fusionar (<span id="datosMergeProjectsCount">0</span>)
                   </button>
+                  <button
+                    type="button"
+                    class="datos-cancel-selection-btn"
+                    data-datos-cancel-selection="projects"
+                    title="Cancelar selección"
+                    aria-label="Cancelar selección"
+                    hidden=""
+                    disabled
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="datos-open-table-btn"
+                    data-datos-open-table="projects"
+                    title="Abrir tabla completa"
+                    aria-label="Abrir tabla completa de Proyecto"
+                    aria-expanded="false"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 3H3v5"></path><path d="M16 3h5v5"></path><path d="M8 21H3v-5"></path><path d="M16 21h5v-5"></path>
+                    </svg>
+                    <span>Abrir</span>
+                  </button>
                   <label class="database-search">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <circle cx="11" cy="11" r="7"></circle>
@@ -14286,7 +14518,7 @@ table [data-column-key="longitude"] .registry-sort-button {
                 </div>
               </div>
               <div class="datos-grid-row datos-grid-header" style="grid-template-columns: 32px 110px 1fr 52px 38px">
-                <span></span><span>Código</span><span>Nombre</span><span></span><span></span>
+                <span></span><span>Código</span><span><button class="datos-sort-button" type="button" data-datos-sort="projects:name" aria-label="Ordenar Nombre"><span class="datos-sort-indicator" aria-hidden="true"></span><span>Nombre</span></button></span><span title="Estado del registro">Estado</span><span></span>
               </div>
             </div>
             <div class="datos-grid-body" id="datosProjectsTable"></div>
@@ -14301,6 +14533,30 @@ table [data-column-key="longitude"] .registry-sort-button {
                   <button type="button" class="datos-merge-btn" id="datosMergeSilos" data-datos-merge="silos" hidden="">
                     Fusionar (<span id="datosMergeSilosCount">0</span>)
                   </button>
+                  <button
+                    type="button"
+                    class="datos-cancel-selection-btn"
+                    data-datos-cancel-selection="silos"
+                    title="Cancelar selección"
+                    aria-label="Cancelar selección"
+                    hidden=""
+                    disabled
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="datos-open-table-btn"
+                    data-datos-open-table="silos"
+                    title="Abrir tabla completa"
+                    aria-label="Abrir tabla completa de Silo"
+                    aria-expanded="false"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 3H3v5"></path><path d="M16 3h5v5"></path><path d="M8 21H3v-5"></path><path d="M16 21h5v-5"></path>
+                    </svg>
+                    <span>Abrir</span>
+                  </button>
                   <label class="database-search">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <circle cx="11" cy="11" r="7"></circle>
@@ -14314,7 +14570,7 @@ table [data-column-key="longitude"] .registry-sort-button {
                 class="datos-grid-row datos-grid-header"
                 style="grid-template-columns: 32px 100px 1fr 90px 52px 38px"
               >
-                <span></span><span>Código</span><span>Nombre</span><span>Tipo</span><span></span><span></span>
+                <span></span><span>Código</span><span><button class="datos-sort-button" type="button" data-datos-sort="silos:name" aria-label="Ordenar Nombre"><span class="datos-sort-indicator" aria-hidden="true"></span><span>Nombre</span></button></span><span>Tipo</span><span title="Estado del registro">Estado</span><span></span>
               </div>
             </div>
             <div class="datos-grid-body" id="datosSilosTable"></div>
@@ -14329,6 +14585,30 @@ table [data-column-key="longitude"] .registry-sort-button {
                   <button type="button" class="datos-merge-btn" id="datosMergePorts" data-datos-merge="ports" hidden="">
                     Fusionar (<span id="datosMergePortsCount">0</span>)
                   </button>
+                  <button
+                    type="button"
+                    class="datos-cancel-selection-btn"
+                    data-datos-cancel-selection="ports"
+                    title="Cancelar selección"
+                    aria-label="Cancelar selección"
+                    hidden=""
+                    disabled
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="datos-open-table-btn"
+                    data-datos-open-table="ports"
+                    title="Abrir tabla completa"
+                    aria-label="Abrir tabla completa de Puerto"
+                    aria-expanded="false"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 3H3v5"></path><path d="M16 3h5v5"></path><path d="M8 21H3v-5"></path><path d="M16 21h5v-5"></path>
+                    </svg>
+                    <span>Abrir</span>
+                  </button>
                   <label class="database-search">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <circle cx="11" cy="11" r="7"></circle>
@@ -14339,7 +14619,7 @@ table [data-column-key="longitude"] .registry-sort-button {
                 </div>
               </div>
               <div class="datos-grid-row datos-grid-header" style="grid-template-columns: 32px 110px 1fr 52px 38px">
-                <span></span><span>Código</span><span>Nombre</span><span></span><span></span>
+                <span></span><span>Código</span><span><button class="datos-sort-button" type="button" data-datos-sort="ports:name" aria-label="Ordenar Nombre"><span class="datos-sort-indicator" aria-hidden="true"></span><span>Nombre</span></button></span><span title="Estado del registro">Estado</span><span></span>
               </div>
             </div>
             <div class="datos-grid-body" id="datosPortsTable"></div>
@@ -14360,6 +14640,30 @@ table [data-column-key="longitude"] .registry-sort-button {
                   >
                     Fusionar (<span id="datosMergeCarriersCount">0</span>)
                   </button>
+                  <button
+                    type="button"
+                    class="datos-cancel-selection-btn"
+                    data-datos-cancel-selection="carriers"
+                    title="Cancelar selección"
+                    aria-label="Cancelar selección"
+                    hidden=""
+                    disabled
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="datos-open-table-btn"
+                    data-datos-open-table="carriers"
+                    title="Abrir tabla completa"
+                    aria-label="Abrir tabla completa de Transportadora"
+                    aria-expanded="false"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 3H3v5"></path><path d="M16 3h5v5"></path><path d="M8 21H3v-5"></path><path d="M16 21h5v-5"></path>
+                    </svg>
+                    <span>Abrir</span>
+                  </button>
                   <label class="database-search">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <circle cx="11" cy="11" r="7"></circle>
@@ -14375,7 +14679,7 @@ table [data-column-key="longitude"] .registry-sort-button {
                 </div>
               </div>
               <div class="datos-grid-row datos-grid-header" style="grid-template-columns: 32px 110px 1fr 52px 38px">
-                <span></span><span>Código</span><span>Nombre</span><span></span><span></span>
+                <span></span><span>Código</span><span><button class="datos-sort-button" type="button" data-datos-sort="carriers:name" aria-label="Ordenar Nombre"><span class="datos-sort-indicator" aria-hidden="true"></span><span>Nombre</span></button></span><span title="Estado del registro">Estado</span><span></span>
               </div>
             </div>
             <div class="datos-grid-body" id="datosCarriersTable"></div>
@@ -15316,6 +15620,12 @@ const DATABASE_TABLES = [
       ["code", "string", "", "Código del commodity"],
       ["name", "string", "", "Nombre principal"],
       ["importedNames", "array", "", "Alias encontrados en importaciones"],
+      ["manualNameEdited", "boolean", "", "Indica que el nombre visible fue editado manualmente"],
+      ["manualNameEditCount", "number", "", "Cantidad de ediciones manuales del nombre"],
+      ["lastManualNameEditAt", "datetime", "", "Fecha de la última edición manual del nombre"],
+      ["mergeOperationCount", "number", "", "Cantidad de operaciones de fusión realizadas sobre el registro"],
+      ["mergedRecordCount", "number", "", "Cantidad de registros absorbidos por fusiones"],
+      ["lastMergedAt", "datetime", "", "Fecha de la última fusión"],
       ["active", "boolean", "", "Estado del registro"],
     ]),
   },
@@ -15329,6 +15639,12 @@ const DATABASE_TABLES = [
       ["code", "string", "", "Código del período"],
       ["name", "string", "", "Nombre del período"],
       ["importedNames", "array", "", "Alias encontrados en importaciones"],
+      ["manualNameEdited", "boolean", "", "Indica que el nombre visible fue editado manualmente"],
+      ["manualNameEditCount", "number", "", "Cantidad de ediciones manuales del nombre"],
+      ["lastManualNameEditAt", "datetime", "", "Fecha de la última edición manual del nombre"],
+      ["mergeOperationCount", "number", "", "Cantidad de operaciones de fusión realizadas sobre el registro"],
+      ["mergedRecordCount", "number", "", "Cantidad de registros absorbidos por fusiones"],
+      ["lastMergedAt", "datetime", "", "Fecha de la última fusión"],
       ["active", "boolean", "", "Estado del registro"],
     ]),
   },
@@ -15342,6 +15658,12 @@ const DATABASE_TABLES = [
       ["code", "string", "", "Código del proyecto"],
       ["name", "string", "", "Nombre visible"],
       ["importedNames", "array", "", "Alias encontrados en importaciones"],
+      ["manualNameEdited", "boolean", "", "Indica que el nombre visible fue editado manualmente"],
+      ["manualNameEditCount", "number", "", "Cantidad de ediciones manuales del nombre"],
+      ["lastManualNameEditAt", "datetime", "", "Fecha de la última edición manual del nombre"],
+      ["mergeOperationCount", "number", "", "Cantidad de operaciones de fusión realizadas sobre el registro"],
+      ["mergedRecordCount", "number", "", "Cantidad de registros absorbidos por fusiones"],
+      ["lastMergedAt", "datetime", "", "Fecha de la última fusión"],
       ["periodId", "number", "FK", "Referencia a periodos.id"],
       ["productId", "number", "FK", "Referencia a commodities.id"],
       ["active", "boolean", "", "Estado del registro"],
@@ -15358,6 +15680,12 @@ const DATABASE_TABLES = [
       ["name", "string", "", "Nombre principal"],
       ["ownershipType", "enum", "", "PROPIO o TERCERO"],
       ["importedNames", "array", "", "Alias encontrados en importaciones"],
+      ["manualNameEdited", "boolean", "", "Indica que el nombre visible fue editado manualmente"],
+      ["manualNameEditCount", "number", "", "Cantidad de ediciones manuales del nombre"],
+      ["lastManualNameEditAt", "datetime", "", "Fecha de la última edición manual del nombre"],
+      ["mergeOperationCount", "number", "", "Cantidad de operaciones de fusión realizadas sobre el registro"],
+      ["mergedRecordCount", "number", "", "Cantidad de registros absorbidos por fusiones"],
+      ["lastMergedAt", "datetime", "", "Fecha de la última fusión"],
       ["active", "boolean", "", "Estado del registro"],
     ]),
   },
@@ -15371,6 +15699,12 @@ const DATABASE_TABLES = [
       ["code", "string", "", "Código de la transportadora"],
       ["name", "string", "", "Nombre principal"],
       ["importedNames", "array", "", "Alias encontrados en importaciones"],
+      ["manualNameEdited", "boolean", "", "Indica que el nombre visible fue editado manualmente"],
+      ["manualNameEditCount", "number", "", "Cantidad de ediciones manuales del nombre"],
+      ["lastManualNameEditAt", "datetime", "", "Fecha de la última edición manual del nombre"],
+      ["mergeOperationCount", "number", "", "Cantidad de operaciones de fusión realizadas sobre el registro"],
+      ["mergedRecordCount", "number", "", "Cantidad de registros absorbidos por fusiones"],
+      ["lastMergedAt", "datetime", "", "Fecha de la última fusión"],
       ["active", "boolean", "", "Estado del registro"],
     ]),
   },
@@ -15384,6 +15718,12 @@ const DATABASE_TABLES = [
       ["code", "string", "", "Código del destino"],
       ["name", "string", "", "Nombre principal"],
       ["importedNames", "array", "", "Alias encontrados en importaciones"],
+      ["manualNameEdited", "boolean", "", "Indica que el nombre visible fue editado manualmente"],
+      ["manualNameEditCount", "number", "", "Cantidad de ediciones manuales del nombre"],
+      ["lastManualNameEditAt", "datetime", "", "Fecha de la última edición manual del nombre"],
+      ["mergeOperationCount", "number", "", "Cantidad de operaciones de fusión realizadas sobre el registro"],
+      ["mergedRecordCount", "number", "", "Cantidad de registros absorbidos por fusiones"],
+      ["lastMergedAt", "datetime", "", "Fecha de la última fusión"],
       ["active", "boolean", "", "Estado del registro"],
     ]),
   },
@@ -23703,20 +24043,88 @@ const DATOS_MERGE_BUTTON_IDS = {
 const DATOS_PAGE_SIZE = 6;
 
 const datosPages = Object.fromEntries(Object.keys(DATOS_COLLECTIONS).map((key) => [key, 1]));
+let activeDatosExpandedCollectionKey = "";
+
+const datosSortDirections = Object.fromEntries(
+  Object.keys(DATOS_COLLECTIONS).map((key) => [key, "asc"]),
+);
+let activeDatosSortCollectionKey = "";
 
 const datosSelection = Object.fromEntries(
   Object.keys(DATOS_COLLECTIONS).map((key) => [key, new Set()]),
 );
 
-function datosMergedAliases(item) {
-  const current = String(item?.name || "")
-    .trim()
-    .toLocaleLowerCase("es");
+function datosNameSortCompare(collectionKey, left, right) {
+  const options = collectionKey === "periods" ? { numeric: true } : undefined;
+  return String(left?.name || "").localeCompare(String(right?.name || ""), "es", options);
+}
+
+function datosOrderedRows(collectionKey, rows) {
+  const direction = datosSortDirections[collectionKey] === "desc" ? -1 : 1;
+  return [...(rows || [])].sort(
+    (left, right) => direction * datosNameSortCompare(collectionKey, left, right),
+  );
+}
+
+function updateDatosSortHeaders() {
+  $$("[data-datos-sort]").forEach((button) => {
+    const [collectionKey, field] = String(button.dataset.datosSort || "").split(":");
+    const isActive = field === "name" && collectionKey === activeDatosSortCollectionKey;
+    const direction = datosSortDirections[collectionKey] === "desc" ? "desc" : "asc";
+    button.classList.toggle("is-active", isActive);
+    const indicator = button.querySelector(".datos-sort-indicator");
+    if (indicator) indicator.textContent = isActive ? (direction === "asc" ? "↑" : "↓") : "";
+    button.setAttribute(
+      "aria-label",
+      isActive
+        ? `Nombre ordenado ${direction === "asc" ? "de A a Z" : "de Z a A"}. Cambiar orden`
+        : "Ordenar Nombre de A a Z",
+    );
+    button.title = isActive
+      ? `Nombre: ${direction === "asc" ? "A a Z" : "Z a A"}. Clic para invertir`
+      : "Ordenar Nombre de A a Z";
+  });
+}
+
+function datosUniqueImportedNames(item) {
   return [
     ...new Set(
       (item?.importedNames || []).map((value) => String(value || "").trim()).filter(Boolean),
     ),
-  ].filter((value) => value.toLocaleLowerCase("es") !== current);
+  ];
+}
+
+function datosNameWasEdited(item) {
+  if (item?.manualNameEdited === true) return true;
+  const importedNames = datosUniqueImportedNames(item);
+  if (importedNames.length !== 1) return false;
+  const currentKey = datosImportedAliasKey(item?.name || "");
+  const importedKey = datosImportedAliasKey(importedNames[0]);
+  return Boolean(currentKey && importedKey && currentKey !== importedKey);
+}
+
+function datosRecordWasMerged(item) {
+  if (Number(item?.mergeOperationCount || 0) > 0 || item?.lastMergedAt) return true;
+  /* Compatibilidad con fusiones hechas antes de que existiera el marcador
+     explícito. Una edición manual simple deja un único nombre importado, por
+     eso ya no se confunde con una fusión. */
+  if (item?.manualNameEdited === true) return false;
+  return datosUniqueImportedNames(item).length > 1;
+}
+
+function datosRecordStatusHtml(item) {
+  const statuses = [];
+  if (datosNameWasEdited(item)) {
+    statuses.push(`<span class="datos-record-status-indicator is-name-edited" title="Nombre editado manualmente" aria-label="Nombre editado manualmente">
+      <svg fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>
+    </span>`);
+  }
+  if (datosRecordWasMerged(item)) {
+    statuses.push(`<span class="datos-record-status-indicator is-merged" title="Datos fusionados" aria-label="Datos fusionados">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/></svg>
+    </span>`);
+  }
+  return statuses.join("");
 }
 
 function embarques2EntityCellHtml(item, fallback) {
@@ -23739,16 +24147,34 @@ function renderDatosSection({ collectionKey, tableId, countId, searchId, rows, c
   const host = $(`#${tableId}`);
   if (!host) return;
   const query = $(`#${searchId}`)?.value || "";
+  const orderedRows = datosOrderedRows(collectionKey, rows);
   const filtered = datosFilterRows(
-    rows,
+    orderedRows,
     query,
     columns.map((column) => column.value),
   );
+  const isExpanded = activeDatosExpandedCollectionKey === collectionKey;
   const totalPages = Math.max(1, Math.ceil(filtered.length / DATOS_PAGE_SIZE));
   datosPages[collectionKey] = Math.min(Math.max(1, datosPages[collectionKey] || 1), totalPages);
   const currentPage = datosPages[collectionKey];
   const pageStart = (currentPage - 1) * DATOS_PAGE_SIZE;
-  const visibleRows = filtered.slice(pageStart, pageStart + DATOS_PAGE_SIZE);
+  const visibleRows = isExpanded
+    ? filtered
+    : filtered.slice(pageStart, pageStart + DATOS_PAGE_SIZE);
+  const section = host.closest(".datos-section-shell");
+  section?.classList.toggle("is-expanded", isExpanded);
+  const openTableBtn = section?.querySelector(`[data-datos-open-table="${collectionKey}"]`);
+  if (openTableBtn) {
+    openTableBtn.classList.toggle("is-active", isExpanded);
+    openTableBtn.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+    openTableBtn.setAttribute("title", isExpanded ? "Cerrar tabla completa" : "Abrir tabla completa");
+    openTableBtn.setAttribute(
+      "aria-label",
+      `${isExpanded ? "Cerrar" : "Abrir"} tabla completa de ${DATOS_COLLECTIONS[collectionKey]?.label || "datos"}`,
+    );
+    const openTableLabel = openTableBtn.querySelector("span");
+    if (openTableLabel) openTableLabel.textContent = isExpanded ? "Cerrar" : "Abrir";
+  }
   const selection = datosSelection[collectionKey];
   [...selection].forEach((id) => {
     if (!rows.some((row) => Number(row.id) === id)) selection.delete(id);
@@ -23761,9 +24187,7 @@ function renderDatosSection({ collectionKey, tableId, countId, searchId, rows, c
           return `<div class="datos-grid-row datos-grid-clickable${checked ? " is-merge-selected" : ""}" style="grid-template-columns:${template}" data-datos-row="${collectionKey}:${row.id}" title="Clique para seleccionar">
         <span class="datos-select-cell"><input type="checkbox" data-datos-select="${collectionKey}:${row.id}" ${checked ? "checked" : ""} aria-label="Seleccionar ${esc(row.name || "")}"></span>
         ${columns.map((column) => `<span>${esc(column.value(row) || "")}</span>`).join("")}
-        <span class="datos-merge-status" title="${datosMergedAliases(row).length ? "Registro unido" : ""}" aria-label="${datosMergedAliases(row).length ? "Registro unido" : ""}">
-          ${datosMergedAliases(row).length ? `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/></svg>` : ""}
-        </span>
+        <span class="datos-record-status" aria-label="Estado del registro">${datosRecordStatusHtml(row)}</span>
         <button class="datos-edit-row-btn" type="button" data-datos-edit="${collectionKey}:${row.id}" title="Editar nombre" aria-label="Editar ${esc(row.name || "")}">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
         </button>
@@ -23775,7 +24199,9 @@ function renderDatosSection({ collectionKey, tableId, countId, searchId, rows, c
   if (countEl) {
     const first = filtered.length ? pageStart + 1 : 0;
     const last = Math.min(pageStart + DATOS_PAGE_SIZE, filtered.length);
-    countEl.textContent = `${first}-${last} de ${filtered.length}`;
+    countEl.textContent = isExpanded
+      ? `${filtered.length} registro${filtered.length === 1 ? "" : "s"}`
+      : `${first}-${last} de ${filtered.length}`;
     const foot = countEl.closest(".table-foot");
     let pager = foot?.querySelector(".datos-pagination");
     if (foot && !pager) {
@@ -23784,7 +24210,10 @@ function renderDatosSection({ collectionKey, tableId, countId, searchId, rows, c
       foot.appendChild(pager);
     }
     if (pager) {
-      pager.innerHTML = `
+      pager.hidden = isExpanded;
+      pager.innerHTML = isExpanded
+        ? ""
+        : `
         <button class="datos-page-btn" type="button" data-datos-page="${collectionKey}:-1" ${currentPage === 1 ? "disabled" : ""} aria-label="Página anterior">‹</button>
         <span>Página ${currentPage} de ${totalPages}</span>
         <button class="datos-page-btn" type="button" data-datos-page="${collectionKey}:1" ${currentPage === totalPages ? "disabled" : ""} aria-label="Página siguiente">›</button>
@@ -23797,6 +24226,14 @@ function renderDatosSection({ collectionKey, tableId, countId, searchId, rows, c
     const countSpan = mergeBtn.querySelector("span");
     if (countSpan) countSpan.textContent = String(selection.size);
     renderDatosSelectionSummary(collectionKey);
+  }
+  const cancelSelectionBtn = document.querySelector(
+    `#view-datos [data-datos-cancel-selection="${collectionKey}"]`,
+  );
+  if (cancelSelectionBtn) {
+    const canCancelSelection = selection.size > 1;
+    cancelSelectionBtn.hidden = !canCancelSelection;
+    cancelSelectionBtn.disabled = !canCancelSelection;
   }
 }
 
@@ -23896,6 +24333,8 @@ function renderDatos() {
     ),
     columns: [{ value: (row) => row.code }, { value: (row) => row.name, isName: true }],
   });
+  updateDatosSortHeaders();
+  document.body.classList.toggle("datos-table-expanded", Boolean(activeDatosExpandedCollectionKey));
 }
 
 function syncDatosEntradaEvolucionReferences(collectionKey, survivor, sourceRecords = []) {
@@ -23963,7 +24402,13 @@ function datosEditNameModal(collectionKey, id) {
     const value = String($("#datosEditNameInput")?.value || "").trim();
     if (!value) return toast("Ingrese un nombre válido.");
     const previousRecord = { ...rec, importedNames: [...(rec.importedNames || [])] };
+    const nameChanged = datosImportedAliasKey(rec.name || "") !== datosImportedAliasKey(value);
     rec.name = value;
+    if (nameChanged) {
+      rec.manualNameEdited = true;
+      rec.manualNameEditCount = Number(rec.manualNameEditCount || 0) + 1;
+      rec.lastManualNameEditAt = new Date().toISOString();
+    }
     stampUpdatedAudit(rec);
     syncDatosEntradaEvolucionReferences(collectionKey, rec, [previousRecord]);
     saveDB();
@@ -24011,6 +24456,9 @@ function datosMergeSelected(collectionKey) {
       if (loser.name) mergedImportedNames.add(loser.name);
     });
     survivor.importedNames = [...mergedImportedNames];
+    survivor.mergeOperationCount = Number(survivor.mergeOperationCount || 0) + 1;
+    survivor.mergedRecordCount = Number(survivor.mergedRecordCount || 0) + losers.length;
+    survivor.lastMergedAt = new Date().toISOString();
     stampUpdatedAudit(survivor);
     const loserIds = new Set(losers.map((loser) => Number(loser.id)));
     (cfg.references || []).forEach(({ collectionKey: referenceCollection, field }) => {
@@ -27463,6 +27911,29 @@ $("#view-datos")?.addEventListener("change", (event) => {
 
 $("#view-datos")?.addEventListener("click", (event) => {
   if (event.target.closest("[data-datos-select]")) return;
+  const sortButton = event.target.closest("[data-datos-sort]");
+  if (sortButton) {
+    const [collectionKey, field] = String(sortButton.dataset.datosSort || "").split(":");
+    if (field !== "name" || !DATOS_COLLECTIONS[collectionKey]) return;
+    if (activeDatosSortCollectionKey === collectionKey) {
+      datosSortDirections[collectionKey] = datosSortDirections[collectionKey] === "asc" ? "desc" : "asc";
+    } else {
+      activeDatosSortCollectionKey = collectionKey;
+      datosSortDirections[collectionKey] = "asc";
+    }
+    datosPages[collectionKey] = 1;
+    renderDatos();
+    return;
+  }
+  const openTableButton = event.target.closest("[data-datos-open-table]");
+  if (openTableButton) {
+    const collectionKey = openTableButton.dataset.datosOpenTable;
+    if (!DATOS_COLLECTIONS[collectionKey]) return;
+    activeDatosExpandedCollectionKey =
+      activeDatosExpandedCollectionKey === collectionKey ? "" : collectionKey;
+    renderDatos();
+    return;
+  }
   const pageButton = event.target.closest("[data-datos-page]");
   if (pageButton && !pageButton.disabled) {
     const [collectionKey, direction] = pageButton.dataset.datosPage.split(":");
@@ -27474,6 +27945,16 @@ $("#view-datos")?.addEventListener("click", (event) => {
   if (editButton) {
     const [collectionKey, idStr] = editButton.dataset.datosEdit.split(":");
     datosEditNameModal(collectionKey, Number(idStr));
+    return;
+  }
+  const cancelSelectionButton = event.target.closest("[data-datos-cancel-selection]");
+  if (cancelSelectionButton) {
+    const collectionKey = cancelSelectionButton.dataset.datosCancelSelection;
+    const selection = datosSelection[collectionKey];
+    if (selection && selection.size > 1) {
+      selection.clear();
+      renderDatos();
+    }
     return;
   }
   const mergeButton = event.target.closest("[data-datos-merge]");
@@ -27491,6 +27972,13 @@ $("#view-datos")?.addEventListener("click", (event) => {
     renderDatos();
     return;
   }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !activeDatosExpandedCollectionKey) return;
+  if ($("#modalOverlay")?.classList.contains("open")) return;
+  activeDatosExpandedCollectionKey = "";
+  renderDatos();
 });
 
 $("#closeModal").onclick = closeModal;
