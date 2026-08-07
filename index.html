@@ -15418,9 +15418,8 @@ const secondaryFirebaseApp = firebase.initializeApp(firebaseConfig, "secondary")
 const secondaryAuth = firebase.auth(secondaryFirebaseApp);
 
 /* Coleções cujo conteúdo é sincronizado como UM documento no Firestore
- * (state/<coleção> = { items: [...] }) — volume pequeno o suficiente para
- * caber tranquilamente no limite de 1MB por documento e não precisar de
- * modelagem em documentos individuais. */
+ * (state/<coleção> = { items: [...] }). Somente conjuntos pequenos ficam
+ * aqui. Entrada Evolución pode ultrapassar 1 MiB e, por isso, usa blocos. */
 const STATE_BLOB_COLLECTIONS = [
   "products",
   "periods",
@@ -15431,14 +15430,24 @@ const STATE_BLOB_COLLECTIONS = [
   "contextHierarchy",
   "embarques2",
   "embarques2ImportBatches",
-  "entradaEvolucion",
 ];
+
+const CHUNKED_STATE_COLLECTIONS = ["entradaEvolucion"];
+const ENTRADA_EVOLUCION_CHUNK_PREFIX = "entradaEvolucion__";
+/* 500 KiB de JSON deixa uma margem confortável abaixo do limite de 1 MiB
+ * por documento do Firestore, inclusive com metadados e nomes de campos. */
+const ENTRADA_EVOLUCION_CHUNK_TARGET_BYTES = 500 * 1024;
 
 /* "profiles" e "users" são coleções de verdade no Firestore (um documento
  * por registro) — "users" precisa disso porque o ID do documento é o UID
  * do Firebase Authentication daquele usuário (usado pelas regras de
  * segurança para decidir permissões). */
-const CURRENT_COLLECTIONS = [...STATE_BLOB_COLLECTIONS, "profiles", "users"];
+const CURRENT_COLLECTIONS = [
+  ...STATE_BLOB_COLLECTIONS,
+  ...CHUNKED_STATE_COLLECTIONS,
+  "profiles",
+  "users",
+];
 
 const EMBARQUES2_COLUMN_PRESENTATION = [
   { minWidth: 115, align: "left" },
@@ -16604,10 +16613,119 @@ function handleFirestoreDataChanged() {
   if (typeof firestoreDataChangeHandler === "function") firestoreDataChangeHandler();
 }
 
+let entradaEvolucionPersistedSignature = null;
+let entradaEvolucionLoadGeneration = 0;
+
+function entradaEvolucionDataSignature(records) {
+  const text = JSON.stringify(Array.isArray(records) ? records : []);
+  let hash = 2166136261;
+  for (let index = 0; index < text.length; index++) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `${text.length}:${(hash >>> 0).toString(16)}`;
+}
+
+function entradaEvolucionChunkId(index) {
+  return `${ENTRADA_EVOLUCION_CHUNK_PREFIX}${String(index + 1).padStart(4, "0")}`;
+}
+
+function splitEntradaEvolucionForFirestore(records) {
+  const source = Array.isArray(records) ? records : [];
+  if (!source.length) return [];
+  const encoder = typeof TextEncoder !== "undefined" ? new TextEncoder() : null;
+  const byteLength = (text) => encoder ? encoder.encode(text).byteLength : unescape(encodeURIComponent(text)).length;
+  const chunks = [];
+  let current = [];
+  let currentBytes = 32;
+  source.forEach((record) => {
+    const serialized = JSON.stringify(record ?? null);
+    const recordBytes = byteLength(serialized) + 2;
+    if (current.length && currentBytes + recordBytes > ENTRADA_EVOLUCION_CHUNK_TARGET_BYTES) {
+      chunks.push(current);
+      current = [];
+      currentBytes = 32;
+    }
+    current.push(record);
+    currentBytes += recordBytes;
+  });
+  if (current.length) chunks.push(current);
+  return chunks;
+}
+
+async function loadEntradaEvolucionChunked(manifestData) {
+  const generation = ++entradaEvolucionLoadGeneration;
+  /* Compatibilidade com versões anteriores, quando ainda cabia em um único
+     state/entradaEvolucion = { items: [...] }. */
+  if (Array.isArray(manifestData?.items)) {
+    const records = manifestData.items;
+    if (generation !== entradaEvolucionLoadGeneration) return null;
+    entradaEvolucionPersistedSignature = entradaEvolucionDataSignature(records);
+    return records;
+  }
+  const chunkCount = Math.max(0, Number(manifestData?.chunkCount || 0));
+  if (!manifestData?.chunked || !chunkCount) {
+    if (generation !== entradaEvolucionLoadGeneration) return null;
+    entradaEvolucionPersistedSignature = entradaEvolucionDataSignature([]);
+    return [];
+  }
+  const docs = await Promise.all(
+    Array.from({ length: chunkCount }, (_, index) =>
+      firestore.collection("state").doc(entradaEvolucionChunkId(index)).get(),
+    ),
+  );
+  if (generation !== entradaEvolucionLoadGeneration) return null;
+  const records = [];
+  docs.forEach((snap, index) => {
+    const data = snap.data();
+    if (!snap.exists || !Array.isArray(data?.items)) {
+      throw new Error(`Falta el bloque ${index + 1} de ${chunkCount} de Entrada Evolución.`);
+    }
+    records.push(...data.items);
+  });
+  entradaEvolucionPersistedSignature = entradaEvolucionDataSignature(records);
+  return records;
+}
+
+async function appendEntradaEvolucionWritesToBatch(batch, records) {
+  const source = Array.isArray(records) ? records : [];
+  const signature = entradaEvolucionDataSignature(source);
+  if (signature === entradaEvolucionPersistedSignature) return false;
+
+  const manifestRef = firestore.collection("state").doc("entradaEvolucion");
+  const previousManifest = await manifestRef.get();
+  const previousData = previousManifest.data() || {};
+  const previousChunkCount = Number(previousData.chunkCount || 0);
+  const chunks = splitEntradaEvolucionForFirestore(source);
+  const revision = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  chunks.forEach((items, index) => {
+    batch.set(firestore.collection("state").doc(entradaEvolucionChunkId(index)), {
+      items,
+      chunkIndex: index,
+      revision,
+    });
+  });
+  for (let index = chunks.length; index < previousChunkCount; index++) {
+    batch.delete(firestore.collection("state").doc(entradaEvolucionChunkId(index)));
+  }
+  batch.set(manifestRef, {
+    chunked: true,
+    storageVersion: 1,
+    chunkCount: chunks.length,
+    recordCount: source.length,
+    revision,
+  });
+  /* Atualiza somente depois do commit; a atribuição definitiva é feita em
+     persistSnapshotToFirestore. */
+  return signature;
+}
+
 function subscribeToFirestore() {
   if (firestoreUnsubscribes.length) return Promise.resolve();
   const trackedKeys = [
     ...STATE_BLOB_COLLECTIONS,
+    ...CHUNKED_STATE_COLLECTIONS,
     "exportacionShipmentPlans",
     "exportacionShipmentPlanHistory",
     "profiles",
@@ -16638,6 +16756,29 @@ function subscribeToFirestore() {
         );
       firestoreUnsubscribes.push(unsub);
     });
+    const entradaUnsub = firestore
+      .collection("state")
+      .doc("entradaEvolucion")
+      .onSnapshot(
+        async (docSnap) => {
+          try {
+            const records = await loadEntradaEvolucionChunked(docSnap.data() || {});
+            if (records === null) return;
+            db.entradaEvolucion = records;
+            normalizeLoadedDatabase(db);
+            markReady("entradaEvolucion");
+            handleFirestoreDataChanged();
+          } catch (error) {
+            console.warn('No se pudo sincronizar "entradaEvolucion".', error);
+            markReady("entradaEvolucion");
+          }
+        },
+        (error) => {
+          console.warn('No se pudo sincronizar "entradaEvolucion".', error);
+          markReady("entradaEvolucion");
+        },
+      );
+    firestoreUnsubscribes.push(entradaUnsub);
     ["exportacionShipmentPlans", "exportacionShipmentPlanHistory"].forEach((key) => {
       const unsub = firestore
         .collection("state")
@@ -16732,7 +16873,12 @@ async function persistSnapshotToFirestore(snapshot) {
       ? snapshot.exportacionShipmentPlanHistory
       : {},
   );
+  const entradaSignature = await appendEntradaEvolucionWritesToBatch(
+    batch,
+    snapshot.entradaEvolucion,
+  );
   await batch.commit();
+  if (entradaSignature) entradaEvolucionPersistedSignature = entradaSignature;
   /* "profiles" y "users" solo pueden ser escritos por un Administrador
      (así lo exigen las reglas de seguridad) — evita que un guardado hecho
      por un usuario Operativo (p. ej. al editar un silo) intente re-grabar
@@ -20930,8 +21076,24 @@ async function runAnimatedEntradaImport(file) {
     ]);
   } catch (error) {
     closeEntradaImportProgress();
-    if (error?.name !== "ImportFileValidationError") console.error(error);
-    showImportFileValidationError(error, "entrada", file);
+    if (error?.name === "ImportFileValidationError") {
+      showImportFileValidationError(error, "entrada", file);
+      return;
+    }
+    console.error(error);
+    const technical = esc(String(error?.message || error || "Error desconocido"));
+    openModal(
+      "No fue posible guardar la importación",
+      `<div class="import-validation-alert">
+        <div class="import-validation-icon">!</div>
+        <div class="import-validation-copy">
+          <strong>El Excel fue leído correctamente, pero los datos no pudieron guardarse.</strong>
+          <p>No se importó ningún dato. La información anterior fue preservada.</p>
+          <div class="import-validation-columns"><strong>Detalle técnico:</strong><div>${technical}</div></div>
+        </div>
+      </div>`,
+      null,
+    );
     return;
   }
   cancelAnimationFrame(entradaImportProgressTimer);
