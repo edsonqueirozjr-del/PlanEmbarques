@@ -15947,6 +15947,34 @@ function isAuthenticatedUserAdmin() {
   return profileIsAdministrator(profile);
 }
 
+function canAuthenticatedUserWriteOperationalData() {
+  const user = authenticatedUser();
+  const profile = byId(db.profiles, user?.profileId);
+  if (!user || !profile || user.active === false || profile.active === false) return false;
+  return profileIsAdministrator(profile) || !profileIsVisualizer(profile);
+}
+
+async function synchronizePersistedUserRolesIfAdmin() {
+  if (!isAuthenticatedUserAdmin()) return false;
+  const updates = (Array.isArray(db.users) ? db.users : [])
+    .map((user) => {
+      const profile = byId(db.profiles, user?.profileId);
+      if (!user?.authUid || !profile) return null;
+      const expectedRole = roleForProfile(profile);
+      return String(user.role || '') === expectedRole ? null : { user, expectedRole };
+    })
+    .filter(Boolean);
+  if (!updates.length) return false;
+
+  const batch = firestore.batch();
+  updates.forEach(({ user, expectedRole }) => {
+    user.role = expectedRole;
+    batch.update(firestore.collection('users').doc(user.authUid), { role: expectedRole });
+  });
+  await batch.commit();
+  return true;
+}
+
 function currentUserMenuAccess() {
   const user = currentUser();
   if (!user) return [];
@@ -16329,7 +16357,7 @@ function unsubscribeFromFirestore() {
 
 let pendingSaveDB = Promise.resolve();
 
-function saveDB() {
+function saveDB({ throwOnError = false } = {}) {
   db.schemaVersion = APP_SCHEMA_VERSION;
   const snapshot = clone(db);
   pendingSaveDB = pendingSaveDB
@@ -16337,7 +16365,8 @@ function saveDB() {
     .then(() => persistSnapshotToFirestore(snapshot))
     .catch((error) => {
       console.warn("No se pudo guardar en Firestore.", error);
-      toast("No se pudo guardar. Verifique su conexión a internet e intente de nuevo.");
+      toast("No se pudo guardar. Verifique sus permisos o la conexión a internet e intente de nuevo.");
+      if (throwOnError) throw error;
     });
   return pendingSaveDB;
 }
@@ -17645,7 +17674,7 @@ async function processEmbarques2Imports(files, prevalidatedFiles = null) {
 
   db.embarques2 = [...preservedRecords, ...importedRecords];
   const importBatch = registerEmbarques2ImportBatch(newRecordIds, now);
-  saveDB();
+  await saveDB({ throwOnError: true });
   renderDatos();
   Object.keys(EMBARQUES2_SCOPES).forEach((scope) => {
     embarques2SortStates[scope] = { key: "openedAt", direction: "desc" };
@@ -17699,6 +17728,10 @@ let embarques2ImportProgressPromise = null;
 let embarques2ImportRequest = { origin: "menu", targetView: "embarques2" };
 
 function requestEmbarques2Import(origin = "submenu", targetView = "embarques2") {
+  if (!canAuthenticatedUserWriteOperationalData()) {
+    toast("Su perfil es de solo lectura y no puede importar datos.");
+    return;
+  }
   embarques2ImportRequest = {
     origin: origin === "menu" ? "menu" : "submenu",
     targetView: String(targetView || "embarques2"),
@@ -20356,7 +20389,7 @@ async function processEntradaEvolucionImport(file, prevalidatedFile = null) {
      filtros en "Abrir Evolución". */
   db.entradaEvolucion = registerEntradaEvolucionImportedData(parsed.records);
   resetEntradaEvolucionAnalysisSelection();
-  saveDB();
+  await saveDB({ throwOnError: true });
   renderDatos();
   try {
     await persistEntradaEvolucionImportFile(file);
@@ -26164,7 +26197,13 @@ function syncEntradaEvolucionFullscreenState() {
   });
 }
 
-const openEntradaEvolucionImport = () => $("#entradaEvolucionImportInput")?.click();
+const openEntradaEvolucionImport = () => {
+  if (!canAuthenticatedUserWriteOperationalData()) {
+    toast("Su perfil es de solo lectura y no puede importar datos.");
+    return;
+  }
+  $("#entradaEvolucionImportInput")?.click();
+};
 
 let entradaEvolucionPeriodRenderFrame = 0;
 
@@ -26274,6 +26313,7 @@ async function handleSignedIn(firebaseUser) {
       await rejectSignedInSession("Su cuenta no tiene acceso activo. Contacte a un administrador.");
       return;
     }
+    await synchronizePersistedUserRolesIfAdmin();
     if (reconcileEntradaEvolucionImportedRegistries()) await saveDB();
     if (!ensureContextAllowed()) {
       await rejectSignedInSession("Su cuenta no tiene acceso activo. Contacte a un administrador.");
