@@ -15843,27 +15843,24 @@ function stampUpdatedAudit(record, now = new Date().toISOString()) {
   return record;
 }
 
-function profileIsAdministrator(profile) {
-  const profileName = String(profile?.name || "")
+function normalizedProfileTypeName(profile) {
+  return String(profile?.name || "")
     .trim()
     .toLocaleLowerCase("es");
-  return (
-    Number(profile?.id) === 1 || profileName === "administrador" || profileName === "administrator"
-  );
+}
+
+function profileIsAdministrator(profile) {
+  const profileName = normalizedProfileTypeName(profile);
+  return profileName === "administrador" || profileName === "administrator";
 }
 
 function profileIsVisualizer(profile) {
-  const profileName = String(profile?.name || "")
-    .trim()
-    .toLocaleLowerCase("es");
-  return Number(profile?.id) === 3 || profileName === "visualizador";
+  return normalizedProfileTypeName(profile) === "visualizador";
 }
 
 function profileIsOperational(profile) {
-  const profileName = String(profile?.name || "")
-    .trim()
-    .toLocaleLowerCase("es");
-  return Number(profile?.id) === 2 || profileName === "operativo" || profileName === "operador";
+  const profileName = normalizedProfileTypeName(profile);
+  return profileName === "operativo" || profileName === "operador";
 }
 
 /* "role" é o campo denormalizado gravado em users/{uid} no Firestore,
@@ -15950,8 +15947,11 @@ function isAuthenticatedUserAdmin() {
 function canAuthenticatedUserWriteOperationalData() {
   const user = authenticatedUser();
   const profile = byId(db.profiles, user?.profileId);
-  if (!user || !profile || user.active === false || profile.active === false) return false;
-  return profileIsAdministrator(profile) || !profileIsVisualizer(profile);
+  /* Importacao e uma autonomia comum a todos os perfis ativos.
+   * O perfil continua controlando menus e demais funcoes da interface,
+   * mas Administrador, Operativo, Visualizador e perfis personalizados
+   * podem importar dados normalmente. */
+  return Boolean(user && profile && user.active !== false && profile.active !== false);
 }
 
 async function synchronizePersistedUserRolesIfAdmin() {
@@ -17729,7 +17729,7 @@ let embarques2ImportRequest = { origin: "menu", targetView: "embarques2" };
 
 function requestEmbarques2Import(origin = "submenu", targetView = "embarques2") {
   if (!canAuthenticatedUserWriteOperationalData()) {
-    toast("Su perfil es de solo lectura y no puede importar datos.");
+    toast("Su usuario o perfil no está activo para importar datos.");
     return;
   }
   embarques2ImportRequest = {
@@ -26199,7 +26199,7 @@ function syncEntradaEvolucionFullscreenState() {
 
 const openEntradaEvolucionImport = () => {
   if (!canAuthenticatedUserWriteOperationalData()) {
-    toast("Su perfil es de solo lectura y no puede importar datos.");
+    toast("Su usuario o perfil no está activo para importar datos.");
     return;
   }
   $("#entradaEvolucionImportInput")?.click();
