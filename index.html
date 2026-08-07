@@ -6173,6 +6173,7 @@ table [data-column-key="longitude"] .registry-sort-button {
 #view-entrada-evolucion .entrada-evolucion-project-filter select,
 #view-entrada-evolucion .entrada-evolucion-project-filter > strong,
 #view-entrada-evolucion .entrada-evolucion-summary strong,
+#view-entrada-evolucion .entrada-evolucion-summary-silos strong,
 #view-entrada-evolucion .entrada-evolucion-toolbar,
 #view-entrada-evolucion .entrada-silo-empty,
 #view-entrada-evolucion .entrada-silo-filter > strong,
@@ -6194,9 +6195,27 @@ table [data-column-key="longitude"] .registry-sort-button {
   font-size: 13px;
   font-weight: 800;
 }
+.entrada-evolucion-summary-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: none;
+}
+.entrada-evolucion-summary-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.entrada-evolucion-summary-pair-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
 .entrada-evolucion-summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   width: 100%;
   max-width: none;
@@ -6215,15 +6234,31 @@ table [data-column-key="longitude"] .registry-sort-button {
   gap: 6px;
   box-shadow: 0 5px 14px rgba(18, 70, 80, 0.055);
 }
-.entrada-evolucion-summary > div > span {
+.entrada-evolucion-summary-silos {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 11px 15px;
+  border: 1px solid #d9e6e9;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fff 0, #f5fafb 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 5px 14px rgba(18, 70, 80, 0.055);
+}
+.entrada-evolucion-summary > div > span,
+.entrada-evolucion-summary-silos > span {
   min-height: 24px;
-  padding: 0 76px 7px 0;
+  padding: 0 0 7px 0;
   border-bottom: 1px solid #e5eef0;
   font-size: 14px;
   font-weight: 800;
   color: #29464d;
 }
-.entrada-evolucion-summary strong {
+.entrada-evolucion-summary strong,
+.entrada-evolucion-summary-silos strong {
   display: grid;
   align-content: center;
   flex: 1;
@@ -6233,9 +6268,6 @@ table [data-column-key="longitude"] .registry-sort-button {
   color: #0e2b32;
 }
 .entrada-evolucion-summary-share {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   width: 38px;
   height: 38px;
   min-width: 38px;
@@ -6248,6 +6280,7 @@ table [data-column-key="longitude"] .registry-sort-button {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: 0 5px 14px rgba(18, 70, 80, 0.055);
   transition:
     background 0.16s ease,
     box-shadow 0.16s ease;
@@ -8178,12 +8211,16 @@ table [data-column-key="longitude"] .registry-sort-button {
     flex: 1;
     min-width: 190px;
   }
+  .entrada-evolucion-summary-row {
+    grid-template-columns: 1fr;
+  }
   .entrada-evolucion-summary {
     width: 100%;
     max-width: none;
     grid-template-columns: 1fr;
   }
-  .entrada-evolucion-summary > div {
+  .entrada-evolucion-summary > div,
+  .entrada-evolucion-summary-silos {
     min-height: 0;
   }
   .entrada-evolucion-required-state {
@@ -12345,44 +12382,32 @@ table [data-column-key="longitude"] .registry-sort-button {
                 </div>
               </div>
             </div>
-            <div class="entrada-evolucion-summary" aria-label="Resumen de entrada">
-              <div>
-                <span>Entrada total</span>
-                <strong id="entradaEvolucionTotal">0 kg</strong>
-                <button
-                  class="entrada-evolucion-summary-share"
-                  type="button"
-                  data-summary-share="entradaEvolucionTotal"
-                  title="Compartir Entrada total"
-                  aria-label="Compartir Entrada total"
-                >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="18" cy="5" r="2.5"></circle>
-                    <circle cx="6" cy="12" r="2.5"></circle>
-                    <circle cx="18" cy="19" r="2.5"></circle>
-                    <path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"></path>
-                  </svg>
-                </button>
+            <div class="entrada-evolucion-summary-row" aria-label="Resumen de entrada">
+              <div class="entrada-evolucion-summary-pair">
+                <div class="entrada-evolucion-summary-pair-head">
+                  <button
+                    class="entrada-evolucion-summary-share"
+                    type="button"
+                    id="shareEntradaEvolucionSummary"
+                    title="Compartir resumen"
+                    aria-label="Compartir Entrada total y Registros"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="18" cy="5" r="2.5"></circle>
+                      <circle cx="6" cy="12" r="2.5"></circle>
+                      <circle cx="18" cy="19" r="2.5"></circle>
+                      <path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div class="entrada-evolucion-summary">
+                  <div><span>Entrada total</span><strong id="entradaEvolucionTotal">0 kg</strong></div>
+                  <div><span>Registros</span><strong id="entradaEvolucionCount">0</strong></div>
+                </div>
               </div>
-              <div>
-                <span>Registros</span>
-                <strong id="entradaEvolucionCount">0</strong>
-                <button
-                  class="entrada-evolucion-summary-share"
-                  type="button"
-                  data-summary-share="entradaEvolucionCount"
-                  title="Compartir Registros"
-                  aria-label="Compartir Registros"
-                >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="18" cy="5" r="2.5"></circle>
-                    <circle cx="6" cy="12" r="2.5"></circle>
-                    <circle cx="18" cy="19" r="2.5"></circle>
-                    <path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"></path>
-                  </svg>
-                </button>
+              <div class="entrada-evolucion-summary-silos">
+                <span>Silos</span><strong id="entradaEvolucionSilos">0</strong>
               </div>
-              <div><span>Silos</span><strong id="entradaEvolucionSilos">0</strong></div>
             </div>
           </div>
           <div
@@ -25813,44 +25838,32 @@ async function sharePlanExportacionImage() {
   }
 }
 
-function entradaEvolucionSummaryCardData(cardId) {
-  const valueEl = $(`#${cardId}`);
-  const card = valueEl?.parentElement;
-  const label = card?.querySelector(":scope > span")?.textContent?.trim() || "";
-  const rows = Array.from(card?.querySelectorAll(".entrada-summary-row") || []).map((row) => ({
-    name: row.querySelector(".entrada-summary-project span")?.textContent?.trim() || "",
-    value: row.querySelector(".entrada-summary-value")?.textContent?.trim() || "",
-    isCompare: row.classList.contains("compare"),
-  }));
-  const diff = card?.querySelector(".entrada-summary-difference");
-  return {
-    label,
-    rows,
-    diffLabel: diff?.querySelector("span")?.textContent?.trim() || "",
-    diffValue: diff?.querySelector("b")?.textContent?.trim() || "",
-    diffState: diff?.classList.contains("is-positive")
-      ? "positive"
-      : diff?.classList.contains("is-negative")
-        ? "negative"
-        : "neutral",
-  };
+function entradaEvolucionSummaryPairData() {
+  return ["entradaEvolucionTotal", "entradaEvolucionCount"].map((id) => {
+    const valueEl = $(`#${id}`);
+    const card = valueEl?.parentElement;
+    const label = card?.querySelector(":scope > span")?.textContent?.trim() || "";
+    const rows = Array.from(card?.querySelectorAll(".entrada-summary-row") || []).map((row) => ({
+      name: row.querySelector(".entrada-summary-project span")?.textContent?.trim() || "",
+      value: row.querySelector(".entrada-summary-value")?.textContent?.trim() || "",
+      isCompare: row.classList.contains("compare"),
+    }));
+    const diff = card?.querySelector(".entrada-summary-difference");
+    return {
+      label,
+      rows,
+      diffLabel: diff?.querySelector("span")?.textContent?.trim() || "",
+      diffValue: diff?.querySelector("b")?.textContent?.trim() || "",
+      diffState: diff?.classList.contains("is-positive")
+        ? "positive"
+        : diff?.classList.contains("is-negative")
+          ? "negative"
+          : "neutral",
+    };
+  });
 }
 
-function entradaEvolucionSummaryShareCanvas(cardId) {
-  const data = entradaEvolucionSummaryCardData(cardId);
-  if (!data.rows.length) throw new Error("No hay datos para compartir.");
-  const scale = 3;
-  const width = 700;
-  const height = data.diffValue ? 380 : 320;
-  const canvas = document.createElement("canvas");
-  canvas.width = width * scale;
-  canvas.height = height * scale;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas no disponible");
-  ctx.scale(scale, scale);
-  ctx.fillStyle = "#f2f5f3";
-  ctx.fillRect(0, 0, width, height);
-  const card = { x: 24, y: 24, w: width - 48, h: height - 48 };
+function drawEntradaEvolucionSummaryCard(ctx, card, data) {
   ctx.save();
   ctx.shadowColor = "rgba(0,61,34,.12)";
   ctx.shadowBlur = 24;
@@ -25860,67 +25873,94 @@ function entradaEvolucionSummaryShareCanvas(cardId) {
   ctx.fill();
   ctx.restore();
   ctx.fillStyle = "#29464d";
-  ctx.font = '800 26px Inter, "Segoe UI", Arial, sans-serif';
+  ctx.font = '800 24px Inter, "Segoe UI", Arial, sans-serif';
   ctx.textAlign = "left";
-  ctx.fillText(data.label, card.x + 28, card.y + 50);
+  ctx.fillText(data.label, card.x + 26, card.y + 46);
   ctx.strokeStyle = "#e5eef0";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(card.x + 24, card.y + 72);
-  ctx.lineTo(card.x + card.w - 24, card.y + 72);
+  ctx.moveTo(card.x + 22, card.y + 66);
+  ctx.lineTo(card.x + card.w - 22, card.y + 66);
   ctx.stroke();
-  let rowY = card.y + 118;
+  let rowY = card.y + 108;
   data.rows.forEach((row) => {
     ctx.beginPath();
     ctx.fillStyle = row.isCompare ? "#f59e0b" : "#0093ab";
-    ctx.arc(card.x + 34, rowY - 6, 6, 0, Math.PI * 2);
+    ctx.arc(card.x + 32, rowY - 6, 6, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#536b71";
-    ctx.font = '400 18px Inter, "Segoe UI", Arial, sans-serif';
+    ctx.font = '400 17px Inter, "Segoe UI", Arial, sans-serif';
     ctx.textAlign = "left";
-    ctx.fillText(row.name, card.x + 52, rowY);
+    ctx.fillText(row.name, card.x + 50, rowY);
     ctx.fillStyle = "#0e2b32";
-    ctx.font = '700 20px Inter, "Segoe UI", Arial, sans-serif';
+    ctx.font = '700 19px Inter, "Segoe UI", Arial, sans-serif';
     ctx.textAlign = "right";
-    ctx.fillText(row.value, card.x + card.w - 28, rowY);
-    rowY += 52;
+    ctx.fillText(row.value, card.x + card.w - 26, rowY);
+    rowY += 48;
   });
   if (data.diffValue) {
     rowY += 4;
     ctx.strokeStyle = "#e5eef0";
     ctx.beginPath();
-    ctx.moveTo(card.x + 24, rowY - 30);
-    ctx.lineTo(card.x + card.w - 24, rowY - 30);
+    ctx.moveTo(card.x + 22, rowY - 28);
+    ctx.lineTo(card.x + card.w - 22, rowY - 28);
     ctx.stroke();
     ctx.fillStyle = "#536b71";
-    ctx.font = '400 16px Inter, "Segoe UI", Arial, sans-serif';
+    ctx.font = '400 15px Inter, "Segoe UI", Arial, sans-serif';
     ctx.textAlign = "left";
-    ctx.fillText(data.diffLabel, card.x + 28, rowY);
+    ctx.fillText(data.diffLabel, card.x + 26, rowY);
     ctx.fillStyle =
       data.diffState === "positive" ? "#0f9d58" : data.diffState === "negative" ? "#d93025" : "#536b71";
-    ctx.font = '700 18px Inter, "Segoe UI", Arial, sans-serif';
+    ctx.font = '700 17px Inter, "Segoe UI", Arial, sans-serif';
     ctx.textAlign = "right";
-    ctx.fillText(data.diffValue, card.x + card.w - 28, rowY);
+    ctx.fillText(data.diffValue, card.x + card.w - 26, rowY);
   }
+}
+
+function entradaEvolucionSummaryShareCanvas() {
+  const [totalData, countData] = entradaEvolucionSummaryPairData();
+  if (!totalData.rows.length && !countData.rows.length) throw new Error("No hay datos para compartir.");
+  const scale = 3;
+  const width = 900;
+  const margin = 24;
+  const gap = 24;
+  const cardW = (width - margin * 2 - gap) / 2;
+  const maxRows = Math.max(totalData.rows.length, countData.rows.length, 1);
+  const hasDiff = Boolean(totalData.diffValue || countData.diffValue);
+  const cardH = 108 + maxRows * 48 + (hasDiff ? 56 : 0) + 20;
+  const height = cardH + margin * 2;
+  const canvas = document.createElement("canvas");
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas no disponible");
+  ctx.scale(scale, scale);
+  ctx.fillStyle = "#f2f5f3";
+  ctx.fillRect(0, 0, width, height);
+  drawEntradaEvolucionSummaryCard(ctx, { x: margin, y: margin, w: cardW, h: cardH }, totalData);
+  drawEntradaEvolucionSummaryCard(
+    ctx,
+    { x: margin + cardW + gap, y: margin, w: cardW, h: cardH },
+    countData,
+  );
   ctx.fillStyle = "#6c7d75";
   ctx.font = '400 13px Inter, "Segoe UI", Arial, sans-serif';
   ctx.textAlign = "right";
-  ctx.fillText("Plan de Embarques", card.x + card.w - 24, card.y + card.h - 16);
+  ctx.fillText("Plan de Embarques", width - margin, height - 14);
   return Promise.resolve(canvas);
 }
 
-async function shareEntradaEvolucionSummaryImage(cardId, button) {
+async function shareEntradaEvolucionSummaryImage(button) {
   if (button) button.disabled = true;
   try {
-    const canvas = await entradaEvolucionSummaryShareCanvas(cardId);
+    const canvas = await entradaEvolucionSummaryShareCanvas();
     const blob = await canvasToPngBlob(canvas);
     const safeProject = String(activeEntradaEvolucionProject || "proyecto")
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/gi, "_")
       .replace(/^_|_$/g, "");
-    const suffix = cardId === "entradaEvolucionTotal" ? "entrada_total" : "registros";
-    const fileName = `evolucion_${suffix}_${safeProject || "proyecto"}.png`;
+    const fileName = `evolucion_resumen_${safeProject || "proyecto"}.png`;
     const file = typeof File === "function" ? new File([blob], fileName, { type: "image/png" }) : null;
     let shared = false;
     if (file && navigator.share && navigator.canShare) {
@@ -25929,7 +25969,7 @@ async function shareEntradaEvolucionSummaryImage(cardId, button) {
           await navigator.share({
             files: [file],
             title: "Evolución de Entrada",
-            text: cardId === "entradaEvolucionTotal" ? "Entrada total" : "Registros",
+            text: "Entrada total y Registros",
           });
           shared = true;
         }
@@ -25937,7 +25977,7 @@ async function shareEntradaEvolucionSummaryImage(cardId, button) {
         if (error?.name === "AbortError") return;
       }
     }
-    if (shared) toast("Tarjeta compartida.");
+    if (shared) toast("Resumen compartido.");
     else {
       downloadExportAnalysisImage(blob, fileName);
       toast("Captura guardada. Ya puede compartirla.");
@@ -27682,11 +27722,8 @@ document.addEventListener("keydown", (event) => {
 
 $("#sharePlanExportacion")?.addEventListener("click", sharePlanExportacionImage);
 $("#shareEntradaEvolucion")?.addEventListener("click", shareEntradaEvolucionImage);
-$$("[data-summary-share]").forEach((button) => {
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    shareEntradaEvolucionSummaryImage(button.dataset.summaryShare, button);
-  });
+$("#shareEntradaEvolucionSummary")?.addEventListener("click", (event) => {
+  shareEntradaEvolucionSummaryImage(event.currentTarget);
 });
 
 $("#fullscreenEntradaEvolucion")?.addEventListener("click", toggleEntradaEvolucionFullscreen);
